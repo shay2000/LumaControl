@@ -24,11 +24,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      # macOS' BSD sort supports -V (version sort); this picks the newest installed
-      # Xcode so the build uses the latest SDK (Liquid Glass on macOS 26).
+      # Pick the newest installed Xcode so the build uses the latest SDK
+      # (Liquid Glass on macOS 26). Uses only POSIX tools — no `sort -V`,
+      # which is a GNU extension.
       - name: Select latest Xcode (Liquid Glass SDK)
         run: |
-          XCODE_PATH="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          XCODE_PATH="$(
+            for app in /Applications/Xcode*.app; do
+              major="$(basename "$app" | sed -E 's/^Xcode(_([0-9]+).*)?\.app$/\2/')"
+              echo "${major:-0} $app"
+            done | sort -n | tail -1 | cut -d' ' -f2-
+          )"
+          if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
+            XCODE_PATH="$(xcode-select -p)"
+          fi
           echo "Selecting $XCODE_PATH"
           sudo xcode-select -s "$XCODE_PATH"
           xcodebuild -version
@@ -75,7 +84,15 @@ jobs:
 
       - name: Select latest Xcode (Liquid Glass SDK)
         run: |
-          XCODE_PATH="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          XCODE_PATH="$(
+            for app in /Applications/Xcode*.app; do
+              major="$(basename "$app" | sed -E 's/^Xcode(_([0-9]+).*)?\.app$/\2/')"
+              echo "${major:-0} $app"
+            done | sort -n | tail -1 | cut -d' ' -f2-
+          )"
+          if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
+            XCODE_PATH="$(xcode-select -p)"
+          fi
           echo "Selecting $XCODE_PATH"
           sudo xcode-select -s "$XCODE_PATH"
           xcodebuild -version

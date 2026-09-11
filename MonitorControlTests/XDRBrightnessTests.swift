@@ -4,21 +4,34 @@ import XCTest
 
 @testable import XDRMonitorControl
 
+// AppleDisplay.getBrightness() short-circuits to a constant for dummy displays, so
+// calcNewBrightness tests use this stub to drive the current brightness directly.
+private class StubbedBrightnessAppleDisplay: AppleDisplay {
+  var stubbedBrightness: Float = 1
+
+  override func getBrightness() -> Float {
+    self.stubbedBrightness
+  }
+}
+
 // Tests for the XDR extended brightness logic. Uses dummy displays so no real
 // display is ever touched from the test suite.
 final class XDRBrightnessTests: XCTestCase {
   var appleDisplay: AppleDisplay!
+  var stubbedDisplay: StubbedBrightnessAppleDisplay!
   var otherDisplay: Display!
 
   override func setUp() {
     super.setUp()
     self.appleDisplay = AppleDisplay(1, name: "XDR Test Display", vendorNumber: 1552, modelNumber: 1_002, serialNumber: 1, isVirtual: false, isDummy: true)
     self.appleDisplay.isXDRCapable = true
+    self.stubbedDisplay = StubbedBrightnessAppleDisplay(1, name: "XDR Stub Display", vendorNumber: 1552, modelNumber: 1_003, serialNumber: 1, isVirtual: false, isDummy: true)
+    self.stubbedDisplay.isXDRCapable = true
     self.otherDisplay = Display(2, name: "Other Test Display", vendorNumber: 7_777, modelNumber: 3, serialNumber: 2, isVirtual: false, isDummy: true)
   }
 
   override func tearDown() {
-    for display in [self.appleDisplay as Display?, self.otherDisplay] {
+    for display in [self.appleDisplay as Display?, self.stubbedDisplay as Display?, self.otherDisplay] {
       display?.removePref(key: .xdrEnabled)
       display?.removePref(key: .xdrMaxBrightness)
       display?.removePref(key: .xdrProbed)
@@ -26,6 +39,7 @@ final class XDRBrightnessTests: XCTestCase {
       display?.removePref(key: .value, for: .brightness)
     }
     self.appleDisplay = nil
+    self.stubbedDisplay = nil
     self.otherDisplay = nil
     super.tearDown()
   }
@@ -52,33 +66,33 @@ final class XDRBrightnessTests: XCTestCase {
   }
 
   func testCalcNewBrightnessStopsAtStandardMaxWhenXDRDisabled() {
-    self.appleDisplay.savePref(false, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(0.99), for: .brightness)
-    XCTAssertEqual(self.appleDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), 1.0)
+    self.stubbedDisplay.savePref(false, key: .xdrEnabled)
+    self.stubbedDisplay.stubbedBrightness = 0.99
+    XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), 1.0)
   }
 
   func testCalcNewBrightnessExtendsIntoXDRRange() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(1.0), for: .brightness)
-    XCTAssertEqual(self.appleDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), Float(1.0625))
+    self.stubbedDisplay.savePref(true, key: .xdrEnabled)
+    self.stubbedDisplay.stubbedBrightness = 1.0
+    XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), Float(1.0625))
   }
 
   func testCalcNewBrightnessClampsAtXDRMax() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(1.48), for: .brightness)
-    XCTAssertEqual(self.appleDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), self.appleDisplay.xdrMaxValue)
+    self.stubbedDisplay.savePref(true, key: .xdrEnabled)
+    self.stubbedDisplay.stubbedBrightness = 1.48
+    XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), self.stubbedDisplay.xdrMaxValue)
   }
 
   func testCalcNewBrightnessClampsAtZeroGoingDown() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(0.02), for: .brightness)
-    XCTAssertEqual(self.appleDisplay.calcNewBrightness(isUp: false, isSmallIncrement: false), 0.0)
+    self.stubbedDisplay.savePref(true, key: .xdrEnabled)
+    self.stubbedDisplay.stubbedBrightness = 0.02
+    XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: false, isSmallIncrement: false), 0.0)
   }
 
   func testCalcNewBrightnessSupportsSmallIncrements() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(1.0), for: .brightness)
-    XCTAssertEqual(self.appleDisplay.calcNewBrightness(isUp: true, isSmallIncrement: true), Float(1.015625))
+    self.stubbedDisplay.savePref(true, key: .xdrEnabled)
+    self.stubbedDisplay.stubbedBrightness = 1.0
+    XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: true, isSmallIncrement: true), Float(1.015625))
   }
 
   func testXDRPrefsRoundTrip() {
