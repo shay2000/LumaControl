@@ -139,7 +139,6 @@ This project is a fork of [MonitorControl](https://github.com/MonitorControl/Mon
 - [@nhurden](https://github.com/nhurden/) — original MediaKeyTap
 - [@kfix](https://github.com/kfix/ddcctl) — ddcctl
 - [@reitermarkus](https://github.com/reitermarkus) — Intel DDC support
-- [javierocasio](https://www.deviantart.com/javierocasio) — app icon background
 
 XDR extended brightness additions by [@shay2000](https://github.com/shay2000).
 
