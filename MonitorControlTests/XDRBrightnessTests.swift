@@ -34,7 +34,6 @@ final class XDRBrightnessTests: XCTestCase {
     for display in [self.appleDisplay as Display?, self.stubbedDisplay as Display?, self.otherDisplay] {
       display?.removePref(key: .xdrEnabled)
       display?.removePref(key: .xdrMaxBrightness)
-      display?.removePref(key: .xdrProbed)
       display?.removePref(key: .xdrWarningAcknowledged)
       display?.removePref(key: .value, for: .brightness)
     }
