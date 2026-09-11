@@ -12,3 +12,4 @@ opening_brace:
   allow_multiline_func: true
 excluded:
   - .build
+  - build
