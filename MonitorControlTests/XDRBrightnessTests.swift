@@ -18,7 +18,7 @@ private class StubbedBrightnessAppleDisplay: AppleDisplay {
 // display is ever touched from the test suite.
 final class XDRBrightnessTests: XCTestCase {
   var appleDisplay: AppleDisplay!
-  var stubbedDisplay: StubbedBrightnessAppleDisplay!
+  private var stubbedDisplay: StubbedBrightnessAppleDisplay!
   var otherDisplay: Display!
 
   override func setUp() {
