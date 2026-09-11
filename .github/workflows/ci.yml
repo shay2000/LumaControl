@@ -26,14 +26,15 @@ jobs:
 
       # Pick the newest installed Xcode so the build uses the latest SDK
       # (Liquid Glass on macOS 26). Uses only POSIX tools — no `sort -V`,
-      # which is a GNU extension.
+      # which is a GNU extension — and sorts each version component
+      # numerically so same-major releases (e.g. 26.2 vs 26.10) order right.
       - name: Select latest Xcode (Liquid Glass SDK)
         run: |
           XCODE_PATH="$(
             for app in /Applications/Xcode*.app; do
-              major="$(basename "$app" | sed -E 's/^Xcode(_([0-9]+).*)?\.app$/\2/')"
-              echo "${major:-0} $app"
-            done | sort -n | tail -1 | cut -d' ' -f2-
+              ver="$(basename "$app" | sed -E 's/^Xcode_?([0-9]+(\.[0-9]+)*)\.app$/\1/')"
+              echo "${ver:-0} $app"
+            done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1 | cut -d' ' -f2-
           )"
           if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
             XCODE_PATH="$(xcode-select -p)"
@@ -86,9 +87,9 @@ jobs:
         run: |
           XCODE_PATH="$(
             for app in /Applications/Xcode*.app; do
-              major="$(basename "$app" | sed -E 's/^Xcode(_([0-9]+).*)?\.app$/\2/')"
-              echo "${major:-0} $app"
-            done | sort -n | tail -1 | cut -d' ' -f2-
+              ver="$(basename "$app" | sed -E 's/^Xcode_?([0-9]+(\.[0-9]+)*)\.app$/\1/')"
+              echo "${ver:-0} $app"
+            done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1 | cut -d' ' -f2-
           )"
           if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
             XCODE_PATH="$(xcode-select -p)"
