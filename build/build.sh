@@ -49,7 +49,7 @@ has_codesigning_identity() {
 
 set +e
 if has_codesigning_identity; then
-  run_xcodebuild
+  run_xcodebuild "$@"
   BUILD_STATUS=$?
 else
   BUILD_STATUS=1
@@ -62,7 +62,7 @@ if [ "$BUILD_STATUS" -ne 0 ]; then
   echo "Accessibility permission may need to be removed and re-added after each rebuild."
   rm -rf "$DERIVED_DATA_DIR"
   set +e
-  run_xcodebuild CODE_SIGN_IDENTITY=-
+  run_xcodebuild CODE_SIGN_IDENTITY=- "$@"
   BUILD_STATUS=$?
   set -e
 fi

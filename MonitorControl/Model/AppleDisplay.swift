@@ -7,6 +7,7 @@ class AppleDisplay: Display {
   private var displayQueue: DispatchQueue
   var isXDRCapable: Bool = false
   var xdrMaxValue: Float = 1.5
+  var xdrPromptShown: Bool = false
 
   var effectiveBrightnessMax: Float {
     (self.isXDRCapable && self.readPrefAsBool(key: .xdrEnabled)) ? self.xdrMaxValue : 1.0
@@ -20,25 +21,45 @@ class AppleDisplay: Display {
     self.detectXDRCapability()
   }
 
+  // Probes whether the display accepts brightness values above the standard maximum (1.0),
+  // which is the case on XDR panels like the MacBook Pro Liquid Retina XDR or the Pro Display XDR.
   private func detectXDRCapability() {
-    guard CGDisplayIsBuiltin(self.identifier) != 0, !self.isDummy else {
+    guard !self.isDummy, !self.isVirtual else {
+      return
+    }
+    // If a previous probe already found an XDR maximum, trust it — probing changes the panel
+    // brightness for a moment, so it should only ever run once per display.
+    let savedMax = self.readPrefAsFloat(key: .xdrMaxBrightness)
+    if savedMax > 1.0 {
+      self.isXDRCapable = true
+      self.xdrMaxValue = savedMax
+      return
+    }
+    // If a previous probe already determined that this display is not XDR capable, don't probe again.
+    if self.readPrefAsBool(key: .xdrProbed) {
       return
     }
     var currentBrightness: Float = 0
-    DisplayServicesGetBrightness(self.identifier, &currentBrightness)
+    guard DisplayServicesGetBrightness(self.identifier, &currentBrightness) == 0 else {
+      // If the current brightness can't be read we must not write anything,
+      // otherwise a failed read could be "restored" as brightness 0 (black screen).
+      return
+    }
     DisplayServicesSetBrightness(self.identifier, 1.01)
     var readBackBrightness: Float = 0
-    DisplayServicesGetBrightness(self.identifier, &readBackBrightness)
+    let readBackResult = DisplayServicesGetBrightness(self.identifier, &readBackBrightness)
+    // Restore the original brightness.
     DisplayServicesSetBrightness(self.identifier, currentBrightness)
+    guard readBackResult == 0 else {
+      // A failed read-back is likely transient (e.g. right after wake) — don't cache it
+      // as a negative result, just probe again next time.
+      return
+    }
+    self.savePref(true, key: .xdrProbed)
     if readBackBrightness > 1.0 {
       self.isXDRCapable = true
-      let savedMax = self.readPrefAsFloat(key: .xdrMaxBrightness)
-      if savedMax > 1.0 {
-        self.xdrMaxValue = savedMax
-      } else {
-        self.xdrMaxValue = 1.5
-        self.savePref(self.xdrMaxValue, key: .xdrMaxBrightness)
-      }
+      self.xdrMaxValue = 1.5
+      self.savePref(self.xdrMaxValue, key: .xdrMaxBrightness)
       os_log("XDR capable display detected: %{public}@, max: %{public}@", type: .info, String(self.identifier), String(self.xdrMaxValue))
     }
   }
@@ -52,13 +73,14 @@ class AppleDisplay: Display {
 
   func disableXDR() {
     self.savePref(false, key: .xdrEnabled)
+    self.xdrPromptShown = false
     _ = self.setBrightness(1.0)
     DispatchQueue.main.async {
       app.updateMenusAndKeys()
     }
   }
 
-  public func getAppleBrightness() -> Float {
+  func getAppleBrightness() -> Float {
     guard !self.isDummy else {
       return 1
     }
@@ -67,7 +89,7 @@ class AppleDisplay: Display {
     return brightness
   }
 
-  public func setAppleBrightness(value: Float) {
+  func setAppleBrightness(value: Float) {
     guard !self.isDummy else {
       return
     }

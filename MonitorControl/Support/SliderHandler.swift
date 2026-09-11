@@ -226,7 +226,7 @@ class SliderHandler {
     }
   }
 
-  public init(display: Display?, command: Command, title: String = "", position _: Int = 0) {
+  init(display: Display?, command: Command, title: String = "", position _: Int = 0) {
     self.command = command
     self.title = title
     let slider = SliderHandler.MCSlider(value: 0, minValue: 0, maxValue: 1, target: self, action: #selector(SliderHandler.valueChanged))
@@ -276,18 +276,26 @@ class SliderHandler {
     }
     slider.maxValue = 1
     if let displayToAppend = display {
-      if command == .brightness, let appleDisplay = displayToAppend as? AppleDisplay, appleDisplay.isXDRCapable, appleDisplay.readPrefAsBool(key: .xdrEnabled) {
-        slider.maxValue = Double(appleDisplay.xdrMaxValue)
-        if let cell = slider.cell as? MCSliderCell {
-          cell.isXDRSlider = true
-        }
-      }
       self.addDisplay(displayToAppend)
+    }
+  }
+
+  // Recomputes the slider range from all displays it controls. XDR extended brightness
+  // (brightnessMaxValue > 1) applies if any member display has it enabled.
+  func updateSliderXDRRange() {
+    guard self.command == .brightness, let slider = self.slider else {
+      return
+    }
+    let maxRange = self.displays.map { $0.brightnessMaxValue }.max() ?? 1.0
+    slider.maxValue = Double(max(maxRange, 1.0))
+    if let cell = slider.cell as? MCSliderCell {
+      cell.isXDRSlider = maxRange > 1.0
     }
   }
 
   func addDisplay(_ display: Display) {
     self.displays.append(display)
+    self.updateSliderXDRRange()
     if let otherDisplay = display as? OtherDisplay {
       let value = otherDisplay.setupSliderCurrentValue(command: self.command)
       self.setValue(value, displayID: otherDisplay.identifier)
@@ -343,13 +351,16 @@ class SliderHandler {
         slider.floatValue = value
       }
     }
-    if self.percentageBox == self.percentageBox {
-      self.percentageBox?.stringValue = "" + String(Int(value * 100)) + "%"
-    }
+    self.percentageBox?.stringValue = String(Int(value * 100)) + "%"
+    var didPromptXDRThisDrag = false
     for display in self.displays {
       slider.setHighlightItem(display.identifier, value: value)
       if self.command == .brightness, let appleDisplay = display as? AppleDisplay {
-        if appleDisplay.isXDRCapable, value >= 0.99, !appleDisplay.readPrefAsBool(key: .xdrEnabled) {
+        if appleDisplay.isXDRCapable, !appleDisplay.readPrefAsBool(key: .xdrEnabled), !appleDisplay.xdrPromptShown, !didPromptXDRThisDrag, value >= 0.999 {
+          // Ask once per display per app session, and only once per drag,
+          // so a cancelled dialog can't reappear while the slider is still moving.
+          appleDisplay.xdrPromptShown = true
+          didPromptXDRThisDrag = true
           let alert = NSAlert()
           alert.messageText = NSLocalizedString("Enable XDR Extended Brightness?", comment: "Shown in the alert dialog")
           alert.informativeText = NSLocalizedString("XDR mode allows brightness above the standard maximum. This may increase heat and reduce battery life, and the display may auto-dim in some conditions.\n\nAfter enabling, drag the slider to the right to set extended brightness.", comment: "Shown in the alert dialog")
@@ -359,14 +370,14 @@ class SliderHandler {
           if alert.runModal() == .alertFirstButtonReturn {
             appleDisplay.savePref(true, key: .xdrEnabled)
             appleDisplay.savePref(true, key: .xdrWarningAcknowledged)
-            slider.maxValue = Double(appleDisplay.xdrMaxValue)
-            if let cell = slider.cell as? MCSliderCell {
-              cell.isXDRSlider = true
-            }
+            self.updateSliderXDRRange()
           } else {
-            slider.floatValue = 1.0
-            self.percentageBox?.stringValue = "100%"
-            _ = appleDisplay.setBrightness(1.0)
+            // XDR stays disabled for this display: clamp only this display to its standard
+            // maximum and leave the shared slider value untouched so other displays that may
+            // already be in the XDR range keep their brightness.
+            let appliedValue = min(value, appleDisplay.brightnessMaxValue)
+            slider.setHighlightItem(display.identifier, value: appliedValue)
+            _ = appleDisplay.setBrightness(appliedValue)
             continue
           }
         }
@@ -402,29 +413,25 @@ class SliderHandler {
         self.values[displayID] = value
         slider.setHighlightItem(displayID, value: value)
       }
-      var sumVal: Float = 0
       var maxVal: Float = 0
-      var minVal: Float = 1
+      var minVal: Float = .greatestFiniteMagnitude
       var num = 0
       for key in self.values.keys {
         if let val = values[key] {
-          sumVal += val
           maxVal = max(maxVal, val)
           minVal = min(minVal, val)
           num += 1
         }
       }
-      // let average = sumVal / Float(num)
-      slider.floatValue = value
+      let clampedValue = min(value, Float(slider.maxValue))
+      slider.floatValue = clampedValue
       self.updateIcon()
-      if abs(maxVal - minVal) > 0.001 {
+      if num > 1, abs(maxVal - minVal) > 0.001 {
         slider.setDisplayHighlightItems(true)
       } else {
         slider.setDisplayHighlightItems(false)
       }
-      if self.percentageBox == self.percentageBox {
-        self.percentageBox?.stringValue = "" + String(Int(value * 100)) + "%"
-      }
+      self.percentageBox?.stringValue = "\(String(format: "%.0f%%", Double(clampedValue) * 100))"
     }
   }
 }

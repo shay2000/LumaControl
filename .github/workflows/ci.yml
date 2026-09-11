@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      # actions/checkout v4.2.2
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # Pick the newest installed Xcode so the build uses the latest SDK
+      # (Liquid Glass on macOS 26). Uses only POSIX tools — no `sort -V`,
+      # which is a GNU extension — and sorts each version component
+      # numerically so same-major releases (e.g. 26.2 vs 26.10) order right.
+      - name: Select latest Xcode (Liquid Glass SDK)
+        run: |
+          XCODE_PATH="$(
+            for app in /Applications/Xcode*.app; do
+              ver="$(basename "$app" | sed -E 's/^Xcode_?([0-9]+(\.[0-9]+)*)\.app$/\1/')"
+              echo "${ver:-0} $app"
+            done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1 | cut -d' ' -f2-
+          )"
+          if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
+            XCODE_PATH="$(xcode-select -p)"
+          fi
+          echo "Selecting $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i 'macos' || true
+
+      - name: Resolve package dependencies
+        run: xcodebuild -resolvePackageDependencies -project MonitorControl.xcodeproj -scheme MonitorControl
+
+      - name: Build and run unit tests
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild test \
+            -project MonitorControl.xcodeproj \
+            -scheme MonitorControl \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER= \
+            2>&1 | tee build/xcodebuild-test.log
+
+      # actions/upload-artifact v4.6.2
+      - name: Upload test log
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: xcodebuild-test-log
+          path: build/xcodebuild-test.log
+          if-no-files-found: ignore
+
+  dmg:
+    name: Build universal DMG
+    runs-on: macos-15
+    timeout-minutes: 90
+    needs: test
+    permissions:
+      contents: write # required to publish the release on tags
+    steps:
+      # actions/checkout v4.2.2
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Select latest Xcode (Liquid Glass SDK)
+        run: |
+          XCODE_PATH="$(
+            for app in /Applications/Xcode*.app; do
+              ver="$(basename "$app" | sed -E 's/^Xcode_?([0-9]+(\.[0-9]+)*)\.app$/\1/')"
+              echo "${ver:-0} $app"
+            done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1 | cut -d' ' -f2-
+          )"
+          if [ -z "$XCODE_PATH" ] || [ ! -d "$XCODE_PATH" ]; then
+            XCODE_PATH="$(xcode-select -p)"
+          fi
+          echo "Selecting $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH"
+          xcodebuild -version
+
+      - name: Build (universal, ad-hoc signed)
+        run: ./build/build.sh "ARCHS=x86_64 arm64" ONLY_ACTIVE_ARCH=NO
+
+      - name: Package DMG
+        run: |
+          APP_PATH="$(pwd)/build/XDRMonitorControl.app"
+          VERSION="$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString)"
+          STAGING=build/dmg-staging
+          rm -rf "$STAGING"
+          mkdir -p "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+          DMG_NAME="XDRMonitorControl-${VERSION}-universal.dmg"
+          hdiutil create -volname "XDRMonitorControl" -srcfolder "$STAGING" -ov -format UDZO "build/$DMG_NAME"
+          hdiutil verify "build/$DMG_NAME"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      # actions/upload-artifact v4.6.2
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.DMG_NAME }}
+          path: build/${{ env.DMG_NAME }}
+
+      # softprops/action-gh-release v2.3.4
+      - name: Release DMG on tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@62c96d0c4e8a889135c1f3a25910db8dbe0e85f7
+        with:
+          files: build/${{ env.DMG_NAME }}
+          generate_release_notes: true
+          body: |
+            XDRMonitorControl ${{ env.APP_VERSION }} — universal (Apple Silicon + Intel) build.
+
+            The build is ad-hoc signed (no Apple Developer certificate). If macOS blocks it on first launch,
+            right-click the app and choose "Open", or run:
+            `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`
