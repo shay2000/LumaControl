@@ -15,7 +15,7 @@
 <br/>
 <br/>
 
-<a href="https://buymeacoffee.com/shay2k"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20this%20fork-yellow?style=flat&logo=buymeacoffee" alt="Buy Me a Coffee"/></a>
+<a href="https://buymeacoffee.com/shay2k"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=%E2%98%95&slug=shay2k&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy Me a Coffee" height="64"></a>
 
 <br/>
 

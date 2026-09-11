@@ -1951,10 +1951,10 @@
             <objects>
                 <viewController storyboardIdentifier="AboutPrefsVC" id="7uI-eE-yxm" customClass="AboutPrefsViewController" customModule="MonitorControl" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kXT-i4-NNT">
-                        <rect key="frame" x="0.0" y="0.0" width="730" height="308"/>
+                        <rect key="frame" x="0.0" y="0.0" width="730" height="380"/>
                         <subviews>
                             <textField identifier="versionLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="tMg-qE-zTW">
-                                <rect key="frame" x="249" y="178" width="420" height="16"/>
+                                <rect key="frame" x="249" y="226" width="420" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="#bc-ignore!" id="mBs-6m-13Q">
                                     <font key="font" metaFont="system"/>
@@ -1962,17 +1962,20 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Dqc-RQ-Lbc">
-                                <rect key="frame" x="249" y="55" width="420" height="16"/>
+                            <button verticalHuggingPriority="750" id="Dqc-RQ-Lbc">
+                                <rect key="frame" x="249" y="70" width="420" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="#bc-ignore!" id="e0q-fb-k7R">
+                                <buttonCell key="cell" type="bevel" title="Original repo: github.com/MonitorControl/MonitorControl" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="e0q-fb-k7R">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
+                                </buttonCell>
+                                <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
+                                <connections>
+                                    <action selector="openOriginalRepo:" target="7uI-eE-yxm" id="ori-repo-001"/>
+                                </connections>
+                            </button>
                             <textField identifier="softwareNameLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dtg-g7-hZb">
-                                <rect key="frame" x="249" y="238" width="420" height="26"/>
+                                <rect key="frame" x="249" y="286" width="420" height="26"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="XDRMonitorControl" id="1PJ-14-Bvn">
                                     <font key="font" textStyle="title1" name=".SFNS-Regular"/>
@@ -1981,7 +1984,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xdr-subtitle">
-                                <rect key="frame" x="249" y="214" width="420" height="16"/>
+                                <rect key="frame" x="249" y="262" width="420" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="A fork of MonitorControl with XDR extended brightness support" id="xdr-subtitle-cell">
                                     <font key="font" metaFont="system"/>
@@ -1990,11 +1993,11 @@
                                 </textFieldCell>
                             </textField>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="9Mt-M9-Xqc">
-                                <rect key="frame" x="249" y="202" width="420" height="4"/>
+                                <rect key="frame" x="249" y="250" width="420" height="4"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="JqO-vB-ykl">
-                                <rect key="frame" x="249" y="82" width="420" height="4"/>
+                                <rect key="frame" x="249" y="104" width="420" height="4"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <imageView identifier="appIcon" wantsLayer="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" id="qQ1-AF-le8">
@@ -2002,34 +2005,21 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="axesIndependently" image="NSApplicationIcon" id="2rQ-WJ-rCY"/>
                             </imageView>
-                            <button verticalHuggingPriority="750" id="rqH-BW-IT6">
-                                <rect key="frame" x="249" y="148" width="420" height="20"/>
+                                                        <button verticalHuggingPriority="750" id="vS5-oh-3k6">
+                                <rect key="frame" x="339" y="128" width="240" height="48"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="bevel" title="Special thanks to our contributors!" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="95V-M4-2l5">
+                                <buttonCell key="cell" type="push" title="☕  Buy Me a Coffee" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ZKk-ve-rS4">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
+                                    <font key="font" metaFont="system" size="16"/>
                                 </buttonCell>
-                                <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
-                                <connections>
-                                    <action selector="openContributorsPage:" target="7uI-eE-yxm" id="YbP-4y-EPf"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" id="vS5-oh-3k6">
-                                <rect key="frame" x="249" y="100" width="420" height="20"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="bevel" title="Support this fork on Buy Me a Coffee" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="ZKk-ve-rS4">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
                                 <connections>
                                     <action selector="openDonate:" target="7uI-eE-yxm" id="vXV-ri-tCT"/>
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" id="W2f-KE-6PO">
-                                <rect key="frame" x="249" y="124" width="420" height="20"/>
+                                <rect key="frame" x="249" y="196" width="420" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="bevel" title="https://monitorcontrol.app" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="42n-Zy-AqF">
+                                <buttonCell key="cell" type="bevel" title="github.com/shay2000/XDRMonitorControl" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="42n-Zy-AqF">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                     <attributedString key="userComments">
@@ -2038,17 +2028,16 @@
                                 </buttonCell>
                                 <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
                                 <connections>
-                                    <action selector="openWebPage:" target="7uI-eE-yxm" id="gcQ-jk-gBN"/>
+                                    <action selector="openGitHubRepo:" target="7uI-eE-yxm" id="gcQ-jk-gBN"/>
                                 </connections>
                             </button>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="height" constant="308" id="hXB-ku-c1r"/>
+                            <constraint firstAttribute="height" constant="380" id="hXB-ku-c1r"/>
                             <constraint firstAttribute="width" constant="730" id="kEY-xf-vB5"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="copyrightLabel" destination="Dqc-RQ-Lbc" id="lGL-A6-Lto"/>
                         <outlet property="versionLabel" destination="tMg-qE-zTW" id="G1o-YJ-X4n"/>
                     </connections>
                 </viewController>

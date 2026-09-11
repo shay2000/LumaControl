@@ -17,12 +17,10 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
   }
 
   @IBOutlet var versionLabel: NSTextField!
-  @IBOutlet var copyrightLabel: NSTextField!
 
   override func viewDidLoad() {
     super.viewDidLoad()
     self.setAppInfo()
-    self.setCopyrightInfo()
   }
 
   @IBAction func openDonate(_: NSButton) {
@@ -31,14 +29,14 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
     }
   }
 
-  @IBAction func openWebPage(_: NSButton) {
-    if let url = URL(string: "https://monitorcontrol.app") {
+  @IBAction func openGitHubRepo(_: NSButton) {
+    if let url = URL(string: "https://github.com/shay2000/XDRMonitorControl") {
       NSWorkspace.shared.open(url)
     }
   }
 
-  @IBAction func openContributorsPage(_: NSButton) {
-    if let url = URL(string: "https://github.com/MonitorControl/MonitorControl/graphs/contributors") {
+  @IBAction func openOriginalRepo(_: NSButton) {
+    if let url = URL(string: "https://github.com/MonitorControl/MonitorControl") {
       NSWorkspace.shared.open(url)
     }
   }
@@ -50,10 +48,5 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
     let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") ?? "error"
 
     self.versionLabel.stringValue = "\(versionName) \(versionNumber) \(buildName) \(buildNumber)"
-  }
-
-  func setCopyrightInfo() {
-    let year = Calendar.current.component(.year, from: Date())
-    self.copyrightLabel.stringValue = "XDRMonitorControl — fork by @shay2000 with XDR extended brightness support. Original © MonitorControl contributors \(year). MIT License."
   }
 }

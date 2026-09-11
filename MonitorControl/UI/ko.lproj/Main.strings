@@ -4,9 +4,6 @@
 /* Class = "NSMenuItem"; title = "Assume last saved settings are valid (recommended)"; ObjectID = "1in-79-6qm"; */
 "1in-79-6qm.title" = "마지막으로 저장한 설정이 유효하다고 가정 (권장)";
 
-/* Class = "NSTextFieldCell"; title = "MonitorControl"; ObjectID = "1PJ-14-Bvn"; */
-"1PJ-14-Bvn.title" = "MonitorControl";
-
 /* Class = "NSMenuItem"; title = "Standard keyboard volume and mute keys"; ObjectID = "1sy-Kd-WL5"; */
 "1sy-Kd-WL5.title" = "표준 키보드 음량 및 음소거 키";
 
@@ -408,9 +405,6 @@
 
 /* Class = "NSMenuItem"; title = "Disable keyboard"; ObjectID = "zHa-xo-XPW"; */
 "zHa-xo-XPW.title" = "키보드 비활성화";
-
-/* Class = "NSButtonCell"; title = "Donate"; ObjectID = "ZKk-ve-rS4"; */
-"ZKk-ve-rS4.title" = "기부하기";
 
 /* Class = "NSButtonCell"; title = "Show percentages"; ObjectID = "ZUu-MR-XwA"; */
 "ZUu-MR-XwA.title" = "백분율 표시";

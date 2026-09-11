@@ -2,9 +2,6 @@
 /* Class = "NSButtonCell"; title = "Sync brightness changes from Built-in and Apple displays"; ObjectID = "0ca-DG-AgB"; */
 "0ca-DG-AgB.title" = "अंतर्निर्मित और ऐपल प्रदर्शनों से चमक परिवर्तनों को सिंक करें";
 
-/* Class = "NSTextFieldCell"; title = "MonitorControl"; ObjectID = "1PJ-14-Bvn"; */
-"1PJ-14-Bvn.title" = "मॉनिटर कंट्रोल";
-
 /* Class = "NSMenuItem"; title = "Assume last saved settings are valid (recommended)"; ObjectID = "1in-79-6qm"; */
 "1in-79-6qm.title" = "मान लीजिए कि अंतिम सहेजी गई सेटिंग्स मान्य हैं  (सिफारिश की गई)";
 
@@ -238,9 +235,6 @@
 
 /* Class = "NSTextFieldCell"; title = "Volume up"; ObjectID = "Z3w-eR-qDF"; */
 "Z3w-eR-qDF.title" = "वॉल्यूम बढ़ाएँ";
-
-/* Class = "NSButtonCell"; title = "Donate"; ObjectID = "ZKk-ve-rS4"; */
-"ZKk-ve-rS4.title" = "दान करें।";
 
 /* Class = "NSButtonCell"; title = "Show percentages"; ObjectID = "ZUu-MR-XwA"; */
 "ZUu-MR-XwA.title" = "प्रतिशत दिखाएँ";

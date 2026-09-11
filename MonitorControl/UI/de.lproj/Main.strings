@@ -4,9 +4,6 @@
 /* Class = "NSMenuItem"; title = "Assume last saved settings are valid (recommended)"; ObjectID = "1in-79-6qm"; */
 "1in-79-6qm.title" = "Annehmen, dass die zuletzt gespeicherten Einstellungen gültig sind (empfohlen)";
 
-/* Class = "NSTextFieldCell"; title = "MonitorControl"; ObjectID = "1PJ-14-Bvn"; */
-"1PJ-14-Bvn.title" = "MonitorControl";
-
 /* Class = "NSMenuItem"; title = "Standard keyboard volume and mute keys"; ObjectID = "1sy-Kd-WL5"; */
 "1sy-Kd-WL5.title" = "Standardtasten für Lautstärke und Stummschaltung";
 
@@ -408,9 +405,6 @@
 
 /* Class = "NSMenuItem"; title = "Disable keyboard"; ObjectID = "zHa-xo-XPW"; */
 "zHa-xo-XPW.title" = "Tastatur deaktivieren";
-
-/* Class = "NSButtonCell"; title = "Donate"; ObjectID = "ZKk-ve-rS4"; */
-"ZKk-ve-rS4.title" = "Spenden";
 
 /* Class = "NSButtonCell"; title = "Show percentages"; ObjectID = "ZUu-MR-XwA"; */
 "ZUu-MR-XwA.title" = "Prozentwerte anzeigen";
