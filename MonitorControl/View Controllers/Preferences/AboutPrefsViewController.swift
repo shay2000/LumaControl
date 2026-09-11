@@ -26,7 +26,7 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
   }
 
   @IBAction func openDonate(_: NSButton) {
-    if let url = URL(string: "https://opencollective.com/monitorcontrol/donate") {
+    if let url = URL(string: "https://buymeacoffee.com/shay2k") {
       NSWorkspace.shared.open(url)
     }
   }
@@ -54,6 +54,6 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
 
   func setCopyrightInfo() {
     let year = Calendar.current.component(.year, from: Date())
-    self.copyrightLabel.stringValue = "XDRMonitorControl — fork by @shay2000. Original © MonitorControl contributors \(year). MIT License."
+    self.copyrightLabel.stringValue = "XDRMonitorControl — fork by @shay2000 with XDR extended brightness support. Original © MonitorControl contributors \(year). MIT License."
   }
 }

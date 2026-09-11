@@ -137,3 +137,48 @@ jobs:
             The build is ad-hoc signed (no Apple Developer certificate). If macOS blocks it on first launch,
             right-click the app and choose "Open", or run:
             `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`
+
+      # Rebuild the Sparkle feed so installed copies can actually see this release.
+      - name: Generate signed appcast
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SPARKLE_PRIVATE_KEY:-}" ]; then
+            echo "::error::SPARKLE_PRIVATE_KEY secret is missing. Add it under Settings > Secrets and variables > Actions - the app rejects updates that are not signed."
+            exit 1
+          fi
+          BUILD="$(defaults read "$(pwd)/build/XDRMonitorControl.app/Contents/Info.plist" CFBundleVersion)"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${DMG_NAME}"
+          python3 build/sparkle_sign.py appcast \
+            --dmg "build/${DMG_NAME}" \
+            --url "$URL" \
+            --version "$BUILD" \
+            --short-version "${APP_VERSION}" \
+            --pub-date "$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S %z')" \
+            --key "$SPARKLE_PRIVATE_KEY" \
+            --out appcast.xml
+          echo "APP_BUILD=$BUILD" >> "$GITHUB_ENV"
+          cat appcast.xml
+
+      - name: Publish appcast to main
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          cp appcast.xml /tmp/new-appcast.xml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -f main
+          # Warn (do not fail) if the build number was not bumped: Sparkle compares
+          # CFBundleVersion, so a release with the same build as an installed copy
+          # would silently never be offered.
+          OLD_BUILD="$(sed -n 's|.*<sparkle:version>\(.*\)</sparkle:version>.*|\1|p' appcast.xml | head -1 || true)"
+          if [ -n "$OLD_BUILD" ] && [ "$OLD_BUILD" -ge "$APP_BUILD" ]; then
+            echo "::warning::Build $APP_BUILD is not newer than the published build $OLD_BUILD. Bump CFBundleVersion before tagging, otherwise installed copies will not see this release."
+          fi
+          cp /tmp/new-appcast.xml appcast.xml
+          git add appcast.xml
+          git commit -m "appcast: XDRMonitorControl ${APP_VERSION} (build ${APP_BUILD}) [skip ci]" || echo "appcast unchanged"
+          git push origin main

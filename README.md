@@ -15,6 +15,10 @@
 <br/>
 <br/>
 
+<a href="https://buymeacoffee.com/shay2k"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20this%20fork-yellow?style=flat&logo=buymeacoffee" alt="Buy Me a Coffee"/></a>
+
+<br/>
+
 <img src=".github/screenshot.png" width="824" alt="Screenshot"/><br/>
 
 </div>
@@ -33,7 +37,7 @@
 - **XDR Safety Controls** — "Reset to Standard Brightness" and "Disable XDR Extended Brightness" menu items let you quickly return to normal range.
 - **Brightness sync respects XDR range** — When syncing brightness across displays, the target display's maximum (including XDR) is respected.
 - **Liquid Glass** — Compatible with the macOS 26 (Tahoe) Liquid Glass design: the app adopts the system glass appearance for menus and controls instead of forcing the legacy look.
-- **No Sparkle update feed** — Automatic updates are disabled in this fork (the upstream feed would replace your XDR features with the official app). Build from source or grab a CI build instead.
+- **Its own update feed** — Sparkle is pointed at this fork's own appcast, so updates come from [shay2000/XDRMonitorControl](https://github.com/shay2000/XDRMonitorControl) releases. The upstream feed is deliberately not used: it would replace your XDR features with the official app. Updates are EdDSA-signed.
 
 ## Downloads (CI-built DMG)
 
@@ -47,6 +51,22 @@ The CI build is ad-hoc signed (no Apple Developer certificate is used). If macOS
 ### Versioning
 
 This fork uses its own version numbers starting at **0.1.0** (`v0.1.0`, `v0.2.0`, …) — one small increment per fork release. The upstream base is tracked separately (this release is based on upstream MonitorControl 4.3.4).
+
+### Releasing a new version
+
+Updates are delivered by Sparkle from `appcast.xml` in this repo, which CI rewrites whenever you push a tag:
+
+1. Bump `CFBundleVersion` (the build number) in `MonitorControl/Info.plist` — or run the **Increase Build Number** target in Xcode. Sparkle compares this number, so a release that reuses the current build number will never be offered to an installed copy.
+2. Bump `MARKETING_VERSION` if this is a new user-facing version.
+3. Commit, then push a tag and let CI do the rest:
+
+   ```sh
+   git tag v0.2.0 && git push origin v0.2.0
+   ```
+
+CI builds the universal DMG, attaches it to the release, signs it, rewrites `appcast.xml`, and commits it back to `main`. The feed is served from `https://raw.githubusercontent.com/shay2000/XDRMonitorControl/main/appcast.xml`.
+
+**One-time setup:** CI needs the EdDSA private key as a repository secret named `SPARKLE_PRIVATE_KEY` (Settings → Secrets and variables → Actions → New repository secret). The matching public key is already in `Info.plist` as `SUPublicEDKey`. If the secret is missing the appcast step fails loudly rather than publishing an update the app would reject.
 
 ## Original MonitorControl features
 
@@ -103,6 +123,10 @@ This project is a fork of [MonitorControl](https://github.com/MonitorControl/Mon
 - [javierocasio](https://www.deviantart.com/javierocasio) — app icon background
 
 XDR extended brightness additions by [@shay2000](https://github.com/shay2000).
+
+If you find this fork useful, consider supporting its development:
+
+<a href="https://buymeacoffee.com/shay2k"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-shay2k-orange?style=flat&logo=buy-me-a-coffee" alt="Buy Me a Coffee"/></a>
 
 ## License
 

@@ -1954,7 +1954,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="730" height="308"/>
                         <subviews>
                             <textField identifier="versionLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="tMg-qE-zTW">
-                                <rect key="frame" x="247" y="211" width="227" height="16"/>
+                                <rect key="frame" x="249" y="178" width="420" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="#bc-ignore!" id="mBs-6m-13Q">
                                     <font key="font" metaFont="system"/>
@@ -1963,7 +1963,7 @@
                                 </textFieldCell>
                             </textField>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Dqc-RQ-Lbc">
-                                <rect key="frame" x="247" y="32" width="227" height="16"/>
+                                <rect key="frame" x="249" y="55" width="420" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="#bc-ignore!" id="e0q-fb-k7R">
                                     <font key="font" metaFont="system"/>
@@ -1972,20 +1972,29 @@
                                 </textFieldCell>
                             </textField>
                             <textField identifier="softwareNameLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dtg-g7-hZb">
-                                <rect key="frame" x="247" y="258" width="147" height="26"/>
+                                <rect key="frame" x="249" y="238" width="420" height="26"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="MonitorControl" id="1PJ-14-Bvn">
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="XDRMonitorControl" id="1PJ-14-Bvn">
                                     <font key="font" textStyle="title1" name=".SFNS-Regular"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
+                            <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xdr-subtitle">
+                                <rect key="frame" x="249" y="214" width="420" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="A fork of MonitorControl with XDR extended brightness support" id="xdr-subtitle-cell">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="9Mt-M9-Xqc">
-                                <rect key="frame" x="249" y="241" width="420" height="4"/>
+                                <rect key="frame" x="249" y="202" width="420" height="4"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="JqO-vB-ykl">
-                                <rect key="frame" x="249" y="62" width="420" height="4"/>
+                                <rect key="frame" x="249" y="82" width="420" height="4"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                             </box>
                             <imageView identifier="appIcon" wantsLayer="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" id="qQ1-AF-le8">
@@ -1994,7 +2003,7 @@
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="axesIndependently" image="NSApplicationIcon" id="2rQ-WJ-rCY"/>
                             </imageView>
                             <button verticalHuggingPriority="750" id="rqH-BW-IT6">
-                                <rect key="frame" x="249" y="165" width="420" height="20"/>
+                                <rect key="frame" x="249" y="148" width="420" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="bevel" title="Special thanks to our contributors!" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="95V-M4-2l5">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2006,18 +2015,19 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" id="vS5-oh-3k6">
-                                <rect key="frame" x="476" y="23" width="200" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="push" title="Donate" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ZKk-ve-rS4">
+                                <rect key="frame" x="249" y="100" width="420" height="20"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="bevel" title="Support this fork on Buy Me a Coffee" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="ZKk-ve-rS4">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
+                                <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
                                 <connections>
                                     <action selector="openDonate:" target="7uI-eE-yxm" id="vXV-ri-tCT"/>
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" id="W2f-KE-6PO">
-                                <rect key="frame" x="249" y="138" width="420" height="20"/>
+                                <rect key="frame" x="249" y="124" width="420" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="bevel" title="https://monitorcontrol.app" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="42n-Zy-AqF">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
