@@ -23,7 +23,7 @@ final class XDRBrightnessTests: XCTestCase {
       display?.removePref(key: .xdrMaxBrightness)
       display?.removePref(key: .xdrProbed)
       display?.removePref(key: .xdrWarningAcknowledged)
-      display?.removePref(for: .brightness)
+      display?.removePref(key: .value, for: .brightness)
     }
     self.appleDisplay = nil
     self.otherDisplay = nil
