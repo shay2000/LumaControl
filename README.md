@@ -29,9 +29,20 @@
 
 ## What's different in this fork
 
-- **XDR Extended Brightness** — Unlocks brightness above the standard system maximum (100%) on MacBook Pro Liquid Retina XDR and Pro Display XDR displays. A red zone appears on the slider when in the extended range. Enable via an opt-in warning dialog the first time you reach maximum brightness.
+- **XDR Extended Brightness** — Unlocks brightness above the standard maximum (100%) on XDR panels: the MacBook Pro Liquid Retina XDR (built-in) and the Pro Display XDR (external). A red zone appears on the slider when in the extended range. Enable via an opt-in warning dialog the first time you reach maximum brightness; drag the slider further right for extended brightness.
 - **XDR Safety Controls** — "Reset to Standard Brightness" and "Disable XDR Extended Brightness" menu items let you quickly return to normal range.
 - **Brightness sync respects XDR range** — When syncing brightness across displays, the target display's maximum (including XDR) is respected.
+- **Liquid Glass** — Compatible with the macOS 26 (Tahoe) Liquid Glass design: the app adopts the system glass appearance for menus and controls instead of forcing the legacy look.
+- **No Sparkle update feed** — Automatic updates are disabled in this fork (the upstream feed would replace your XDR features with the official app). Build from source or grab a CI build instead.
+
+## Downloads (CI-built DMG)
+
+Every push and pull request builds a universal (Apple Silicon + Intel) DMG:
+
+1. Go to the [Actions tab](https://github.com/shay2000/XDRMonitorControl/actions), pick the latest successful **CI** run on `main` (or any release), and download the `XDRMonitorControl-…-universal.dmg` artifact.
+2. Tagged releases (e.g. `v4.3.4`) publish the DMG on the [Releases page](https://github.com/shay2000/XDRMonitorControl/releases).
+
+The CI build is ad-hoc signed (no Apple Developer certificate is used). If macOS blocks it on first launch, right-click the app and choose **Open**, or run `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`.
 
 ## Original MonitorControl features
 

@@ -134,6 +134,9 @@ enum PrefKey: String {
   // XDR maximum brightness value for display
   case xdrMaxBrightness
 
+  // XDR capability probe already performed for display
+  case xdrProbed
+
   /* -- Display+Command specific settings -- */
 
   // Command value display

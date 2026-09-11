@@ -58,6 +58,7 @@
 		F06792F6200A745F0066C438 /* MonitorControlHelper.app in [Login] Copy Helper to start at Login */ = {isa = PBXBuildFile; fileRef = F06792E7200A73460066C438 /* MonitorControlHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F0A489C4279C71B200BEDFD6 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A489C3279C71B200BEDFD6 /* OnboardingViewController.swift */; };
 		FE4E0896249D584C003A50BB /* OSDUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4E0895249D584C003A50BB /* OSDUtils.swift */; };
+		E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -181,6 +182,8 @@
 		FB5DB28F2AD54C4600306223 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/InternetAccessPolicy.strings"; sourceTree = "<group>"; };
 		FB5DB2902AD54C4600306223 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		FE4E0895249D584C003A50BB /* OSDUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSDUtils.swift; sourceTree = "<group>"; };
+		E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XDRBrightnessTests.swift; sourceTree = "<group>"; };
+		E77C0DE000000000000000A2 /* MonitorControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MonitorControlTests.xctest; path = MonitorControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +203,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F06792E4200A73460066C438 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E77C0DE000000000000000A6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -233,6 +243,7 @@
 		56754EA21D9A4016007BCDC5 = {
 			isa = PBXGroup;
 			children = (
+				E77C0DE000000000000000A4 /* MonitorControlTests */,
 				AAB2F646273ED127004AB5A4 /* Misc */,
 				28D1DDD1227FB759004CB494 /* Frameworks */,
 				56754EAD1D9A4016007BCDC5 /* MonitorControl */,
@@ -245,6 +256,7 @@
 		56754EAC1D9A4016007BCDC5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				E77C0DE000000000000000A2 /* MonitorControlTests.xctest */,
 				56754EAB1D9A4016007BCDC5 /* MonitorControl.app */,
 				F06792E7200A73460066C438 /* MonitorControlHelper.app */,
 			);
@@ -371,6 +383,14 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		E77C0DE000000000000000A4 /* MonitorControlTests */ = {
+			isa = PBXGroup;
+			children = (
+				E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */,
+			);
+			path = MonitorControlTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -422,6 +442,26 @@
 			productName = MonitorControlHelper;
 			productReference = F06792E7200A73460066C438 /* MonitorControlHelper.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E77C0DE000000000000000A8 /* MonitorControlTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E77C0DE000000000000000A9 /* Build configuration list for PBXNativeTarget "MonitorControlTests" */;
+			buildPhases = (
+				E77C0DE000000000000000A5 /* Sources */,
+				E77C0DE000000000000000A6 /* Frameworks */,
+				E77C0DE000000000000000A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E77C0DE000000000000000AD /* PBXTargetDependency */,
+			);
+			name = MonitorControlTests;
+			packageProductDependencies = (
+			);
+			productName = MonitorControlTests;
+			productReference = E77C0DE000000000000000A2 /* MonitorControlTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -486,6 +526,7 @@
 			targets = (
 				56754EAA1D9A4016007BCDC5 /* MonitorControl */,
 				F06792E6200A73460066C438 /* MonitorControlHelper */,
+				E77C0DE000000000000000A8 /* MonitorControlTests */,
 			);
 		};
 /* End PBXProject section */
@@ -508,6 +549,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				28D1DDF3227FC8C6004CB494 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E77C0DE000000000000000A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,7 +736,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E77C0DE000000000000000A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		E77C0DE000000000000000AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 56754EA31D9A4016007BCDC5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 56754EAA1D9A4016007BCDC5;
+			remoteInfo = MonitorControl;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		E77C0DE000000000000000AD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 56754EAA1D9A4016007BCDC5 /* MonitorControl */;
+			targetProxy = E77C0DE000000000000000AC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		6CDA0FCD26485A8300F52125 /* Main.storyboard */ = {
@@ -1027,6 +1101,48 @@
 			};
 			name = Release;
 		};
+		E77C0DE000000000000000AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.5;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/XDRMonitorControl.app/Contents/MacOS/XDRMonitorControl";
+			};
+			name = Debug;
+		};
+		E77C0DE000000000000000AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.5;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/XDRMonitorControl.app/Contents/MacOS/XDRMonitorControl";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1053,6 +1169,15 @@
 			buildConfigurations = (
 				F06792F2200A73470066C438 /* Debug */,
 				F06792F3200A73470066C438 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E77C0DE000000000000000A9 /* Build configuration list for PBXNativeTarget "MonitorControlTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E77C0DE000000000000000AA /* Debug */,
+				E77C0DE000000000000000AB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select latest Xcode (Liquid Glass SDK)
+        run: |
+          XCODE_PATH="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "Selecting $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i 'macos' || true
+
+      - name: Resolve package dependencies
+        run: xcodebuild -resolvePackageDependencies -project MonitorControl.xcodeproj -scheme MonitorControl
+
+      - name: Build and run unit tests
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild test \
+            -project MonitorControl.xcodeproj \
+            -scheme MonitorControl \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER= \
+            2>&1 | tee build/xcodebuild-test.log
+
+      - name: Upload test log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-test-log
+          path: build/xcodebuild-test.log
+          if-no-files-found: ignore
+
+  dmg:
+    name: Build universal DMG
+    runs-on: macos-15
+    timeout-minutes: 90
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select latest Xcode (Liquid Glass SDK)
+        run: |
+          XCODE_PATH="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "Selecting $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH"
+          xcodebuild -version
+
+      - name: Build (universal, ad-hoc signed)
+        run: ./build/build.sh "ARCHS=x86_64 arm64" ONLY_ACTIVE_ARCH=NO
+
+      - name: Package DMG
+        run: |
+          APP_PATH="$(pwd)/build/XDRMonitorControl.app"
+          VERSION="$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString)"
+          STAGING=build/dmg-staging
+          rm -rf "$STAGING"
+          mkdir -p "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+          DMG_NAME="XDRMonitorControl-${VERSION}-universal.dmg"
+          hdiutil create -volname "XDRMonitorControl" -srcfolder "$STAGING" -ov -format UDZO "build/$DMG_NAME"
+          hdiutil verify "build/$DMG_NAME"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DMG_NAME }}
+          path: build/${{ env.DMG_NAME }}
+
+      - name: Release DMG on tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/${{ env.DMG_NAME }}
+          generate_release_notes: true
+          body: |
+            XDRMonitorControl ${{ env.APP_VERSION }} — universal (Apple Silicon + Intel) build.
+
+            The build is ad-hoc signed (no Apple Developer certificate). If macOS blocks it on first launch,
+            right-click the app and choose "Open", or run:
+            `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`

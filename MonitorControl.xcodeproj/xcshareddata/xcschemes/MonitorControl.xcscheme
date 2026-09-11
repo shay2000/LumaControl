@@ -37,6 +37,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "E77C0DE000000000000000A8"
+               BuildableName = "MonitorControlTests.xctest"
+               BlueprintName = "MonitorControlTests"
+               ReferencedContainer = "container:MonitorControl.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

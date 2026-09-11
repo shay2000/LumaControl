@@ -65,7 +65,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayReconfigured() }, nil)
     self.configure(firstrun: true)
     DisplayManager.shared.createGammaActivityEnforcer()
-    self.updaterController.startUpdater()
+    // This fork ships without an update feed; only start Sparkle if one is configured.
+    if Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil {
+      self.updaterController.startUpdater()
+    }
   }
 
   @objc func quitClicked(_: AnyObject) {
@@ -111,7 +114,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {
       // Only settings that are not false, 0 or "" by default are set here. Assumes pre-wiped database.
       prefs.set(true, forKey: PrefKey.appAlreadyLaunched.rawValue)
-      prefs.set(true, forKey: PrefKey.SUEnableAutomaticChecks.rawValue)
+      // This fork has no Sparkle update feed, so automatic update checks are off by default.
+      prefs.set(false, forKey: PrefKey.SUEnableAutomaticChecks.rawValue)
     }
   }
 

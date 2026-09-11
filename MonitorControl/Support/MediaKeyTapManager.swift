@@ -206,10 +206,10 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
 
   static func acquirePrivileges(firstAsk: Bool = false) {
     if !self.readPrivileges(prompt: true), !firstAsk {
-      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "MonitorControl"
+      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "XDRMonitorControl"
       let alert = NSAlert()
       alert.messageText = NSLocalizedString("Shortcuts not available", comment: "Shown in the alert dialog")
-      alert.informativeText = "You need to enable \(appName) in System Settings > Privacy & Security > Accessibility for the keyboard shortcuts to work. If it is already enabled, remove it and add the current app again."
+      alert.informativeText = String(format: NSLocalizedString("You need to enable %@ in System Settings > Privacy & Security > Accessibility for the keyboard shortcuts to work. If it is already enabled, remove it and add the current app again.", comment: "Shown in the alert dialog"), appName)
       alert.runModal()
     }
   }
