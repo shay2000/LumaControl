@@ -40,9 +40,13 @@
 Every push and pull request builds a universal (Apple Silicon + Intel) DMG:
 
 1. Go to the [Actions tab](https://github.com/shay2000/XDRMonitorControl/actions), pick the latest successful **CI** run on `main` (or any release), and download the `XDRMonitorControl-…-universal.dmg` artifact.
-2. Tagged releases (e.g. `v4.3.4`) publish the DMG on the [Releases page](https://github.com/shay2000/XDRMonitorControl/releases).
+2. Tagged releases (e.g. `v0.1.0`) publish the DMG on the [Releases page](https://github.com/shay2000/XDRMonitorControl/releases).
 
 The CI build is ad-hoc signed (no Apple Developer certificate is used). If macOS blocks it on first launch, right-click the app and choose **Open**, or run `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`.
+
+### Versioning
+
+This fork uses its own version numbers starting at **0.1.0** (`v0.1.0`, `v0.2.0`, …) — one small increment per fork release. The upstream base is tracked separately (this release is based on upstream MonitorControl 4.3.4).
 
 ## Original MonitorControl features
 
