@@ -53,14 +53,28 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       displays.append(contentsOf: DisplayManager.shared.getAppleDisplays())
     }
     displays.append(contentsOf: DisplayManager.shared.getOtherDisplays())
-    displays = DisplayManager.shared.sortDisplaysByFriendlyName()
-    let relevant = prefs.integer(forKey: PrefKey.multiSliders.rawValue) == MultiSliders.relevant.rawValue
+    // Sort the list built above, not the manager's full list. Sorting the full list used
+    // to silently discard the hideAppleFromMenu filter applied two lines earlier.
+    displays = DisplayManager.shared.sortDisplaysByFriendlyName(displays)
+    var relevant = prefs.integer(forKey: PrefKey.multiSliders.rawValue) == MultiSliders.relevant.rawValue
     let combine = prefs.integer(forKey: PrefKey.multiSliders.rawValue) == MultiSliders.combine.rawValue
     let numOfDisplays = displays.filter { !$0.isDummy }.count
+    // "Relevant display only" needs a display under the pointer. When there is not one —
+    // a stale mouse location, or a reconfiguration in flight — fall back to showing every
+    // display rather than force-unwrapping nil and trapping.
+    var relevantDisplayID: CGDirectDisplayID?
+    if relevant {
+      if let currentDisplay = currentDisplay {
+        relevantDisplayID = DisplayManager.resolveEffectiveDisplayID(currentDisplay.identifier)
+      } else {
+        os_log("No display under the pointer for relevant-display mode, showing all displays.", type: .info)
+        relevant = false
+      }
+    }
     if numOfDisplays != 0 {
       let asSubMenu: Bool = (displays.count > 3 && !relevant && !combine && app.macOS10()) ? true : false
       var iterator = 0
-      for display in displays where (!relevant || DisplayManager.resolveEffectiveDisplayID(display.identifier) == DisplayManager.resolveEffectiveDisplayID(currentDisplay!.identifier)) && !display.isDummy {
+      for display in displays where (!relevant || DisplayManager.resolveEffectiveDisplayID(display.identifier) == relevantDisplayID) && !display.isDummy {
         iterator += 1
         if !relevant, !combine, iterator != 1, app.macOS10() {
           self.insertItem(NSMenuItem.separator(), at: 0)
@@ -105,9 +119,10 @@ class MenuHandler: NSMenu, NSMenuDelegate {
     if numOfDisplays > 1, prefs.integer(forKey: PrefKey.multiSliders.rawValue) != MultiSliders.relevant.rawValue, !DEBUG_MACOS10, #available(macOS 11.0, *) {
       class BlockView: NSView {
         override func draw(_: NSRect) {
-          let radius = prefs.bool(forKey: PrefKey.showTickMarks.rawValue) ? CGFloat(4) : CGFloat(11)
-          let outerMargin = CGFloat(15)
-          let blockRect = self.frame.insetBy(dx: outerMargin, dy: outerMargin / 2 + 2).offsetBy(dx: 0, dy: outerMargin / 2 * -1 + 7)
+          // The card is inset symmetrically from the item view, so the row views placed
+          // below can never straddle its border.
+          let blockRect = self.bounds.insetBy(dx: MenuMetrics.outerMargin, dy: MenuMetrics.outerMargin)
+          let radius: CGFloat = 10
           for i in 1 ... 5 {
             let blockPath = NSBezierPath(roundedRect: blockRect.insetBy(dx: CGFloat(i) * -1, dy: CGFloat(i) * -1), xRadius: radius + CGFloat(i) * 0.5, yRadius: radius + CGFloat(i) * 0.5)
             NSColor.black.withAlphaComponent(0.1 / CGFloat(i)).setStroke()
@@ -129,32 +144,51 @@ class MenuHandler: NSMenu, NSMenuDelegate {
           }
         }
       }
-      var contentWidth: CGFloat = 0
-      var contentHeight: CGFloat = 0
-      for addedSliderHandler in addedSliderHandlers {
-        contentWidth = max(addedSliderHandler.view!.frame.width, contentWidth)
-        contentHeight += addedSliderHandler.view!.frame.height
-      }
-      let margin = CGFloat(13)
+
+      let showPercent = prefs.bool(forKey: PrefKey.enableSliderPercent.rawValue)
+      let rowWidth = MenuMetrics.rowWidth(showPercent: showPercent)
+      let rowHeight = MenuMetrics.rowHeight
+      let itemWidth = MenuMetrics.itemWidth(showPercent: showPercent)
+      let contentX = MenuMetrics.outerMargin + MenuMetrics.cardPadding
+
       var blockNameView: NSTextField?
+      var labelHeight: CGFloat = 0
       if blockName != "" {
-        contentHeight += 21
         let attrs: [NSAttributedString.Key: Any] = [.foregroundColor: NSColor.textColor, .font: NSFont.boldSystemFont(ofSize: 12)]
         blockNameView = NSTextField(labelWithAttributedString: NSAttributedString(string: blockName, attributes: attrs))
-        blockNameView?.frame.size.width = contentWidth - margin * 2
+        // The label shares the icons' left edge, so it starts one icon gutter in and stops
+        // at the content column's trailing edge.
+        blockNameView?.frame.size.width = rowWidth - MenuMetrics.iconGutter
         blockNameView?.alphaValue = 0.5
+        // Measure the label instead of assuming a fixed 21 pt: a longer localised display
+        // name or a larger accessibility text size would otherwise collide with it.
+        labelHeight = blockNameView?.fittingSize.height ?? 0
       }
-      let itemView = BlockView(frame: NSRect(x: 0, y: 0, width: contentWidth + margin * 2, height: contentHeight + margin * 2))
-      var sliderPosition = CGFloat(margin * -1 + 1)
-      for addedSliderHandler in addedSliderHandlers {
-        addedSliderHandler.view!.setFrameOrigin(NSPoint(x: margin, y: margin + sliderPosition + 13))
-        itemView.addSubview(addedSliderHandler.view!)
-        sliderPosition += addedSliderHandler.view!.frame.height
-      }
-      if let blockNameView = blockNameView {
-        blockNameView.setFrameOrigin(NSPoint(x: margin + 13, y: contentHeight - 8))
+
+      let rowCount = CGFloat(addedSliderHandlers.count)
+      let cardHeight = MenuMetrics.cardPadding * 2
+        + (labelHeight > 0 ? labelHeight + MenuMetrics.labelGap : 0)
+        + rowCount * rowHeight
+      let itemView = BlockView(frame: NSRect(x: 0, y: 0,
+                                             width: itemWidth,
+                                             height: cardHeight + MenuMetrics.outerMargin * 2))
+
+      // Lay the card's content out downwards from its top edge, so the padding above the
+      // label and below the last slider come out equal by construction rather than by
+      // hand-tuned offsets.
+      var cursor = itemView.frame.height - MenuMetrics.outerMargin - MenuMetrics.cardPadding
+      if let blockNameView = blockNameView, labelHeight > 0 {
+        cursor -= labelHeight
+        blockNameView.setFrameOrigin(NSPoint(x: contentX + MenuMetrics.iconGutter, y: cursor))
         itemView.addSubview(blockNameView)
+        cursor -= MenuMetrics.labelGap
       }
+      for addedSliderHandler in addedSliderHandlers {
+        cursor -= rowHeight
+        addedSliderHandler.view!.frame = NSRect(x: contentX, y: cursor, width: rowWidth, height: rowHeight)
+        itemView.addSubview(addedSliderHandler.view!)
+      }
+
       let item = NSMenuItem()
       item.view = itemView
       if addedSliderHandlers.count != 0 {
@@ -200,15 +234,28 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       addedSliderHandlers.append(self.setupMenuSliderHandler(command: .brightness, display: display, title: title))
     }
     if prefs.integer(forKey: PrefKey.multiSliders.rawValue) != MultiSliders.combine.rawValue {
-      if let appleDisplay = display as? AppleDisplay, appleDisplay.isXDRCapable, appleDisplay.readPrefAsBool(key: .xdrEnabled) {
-        let disableItem = NSMenuItem(title: NSLocalizedString("Disable XDR Extended Brightness", comment: "Shown in menu"), action: #selector(MenuHandler.xdrDisableBrightness(_:)), keyEquivalent: "")
-        disableItem.representedObject = appleDisplay
-        disableItem.target = self
-        monitorSubMenu.insertItem(disableItem, at: 0)
-        let resetItem = NSMenuItem(title: NSLocalizedString("Reset to Standard Brightness", comment: "Shown in menu"), action: #selector(MenuHandler.xdrResetBrightness(_:)), keyEquivalent: "")
-        resetItem.representedObject = appleDisplay
-        resetItem.target = self
-        monitorSubMenu.insertItem(resetItem, at: 0)
+      // Only offered on panels that actually have a range above SDR white to unlock. On
+      // anything else the item would do nothing but explain itself.
+      if let appleDisplay = display as? AppleDisplay, appleDisplay.isXDRCapable, !appleDisplay.isVirtual, !appleDisplay.isDummy {
+        if appleDisplay.readPrefAsBool(key: .xdrEnabled) {
+          let disableItem = NSMenuItem(title: NSLocalizedString("Disable XDR Extended Brightness", comment: "Shown in menu"), action: #selector(MenuHandler.xdrDisableBrightness(_:)), keyEquivalent: "")
+          disableItem.representedObject = appleDisplay
+          disableItem.target = self
+          monitorSubMenu.insertItem(disableItem, at: 0)
+          let resetItem = NSMenuItem(title: NSLocalizedString("Reset to Standard Brightness", comment: "Shown in menu"), action: #selector(MenuHandler.xdrResetBrightness(_:)), keyEquivalent: "")
+          resetItem.representedObject = appleDisplay
+          resetItem.target = self
+          monitorSubMenu.insertItem(resetItem, at: 0)
+        } else {
+          // Offered even before the panel has been probed, so there is always a
+          // discoverable way in. Previously the only route was dragging the brightness
+          // slider to 100%, which keyboard-only users could never do, and the menu items
+          // only appeared once XDR was already on.
+          let enableItem = NSMenuItem(title: NSLocalizedString("Enable XDR Extended Brightness…", comment: "Shown in menu"), action: #selector(MenuHandler.xdrEnableBrightness(_:)), keyEquivalent: "")
+          enableItem.representedObject = appleDisplay
+          enableItem.target = self
+          monitorSubMenu.insertItem(enableItem, at: 0)
+        }
       }
       self.addDisplayMenuBlock(addedSliderHandlers: addedSliderHandlers, blockName: display.readPrefAsString(key: .friendlyName) != "" ? display.readPrefAsString(key: .friendlyName) : display.name, monitorSubMenu: monitorSubMenu, numOfDisplays: numOfDisplays, asSubMenu: asSubMenu)
     }
@@ -240,6 +287,25 @@ class MenuHandler: NSMenu, NSMenuDelegate {
     appleDisplay.disableXDR()
   }
 
+  @objc func xdrEnableBrightness(_ sender: NSMenuItem) {
+    guard let appleDisplay = sender.representedObject as? AppleDisplay else { return }
+    // Deferred: a menu item action runs while the menu is still unwinding, and this ends
+    // up presenting a modal alert.
+    DispatchQueue.main.async {
+      if appleDisplay.canOfferXDR {
+        if appleDisplay.promptToEnableXDR(force: true) {
+          appleDisplay.sliderHandler[.brightness]?.updateSliderXDRRange()
+        }
+      } else if !appleDisplay.readPrefAsBool(key: .xdrEnabled) {
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Extended brightness is not available", comment: "Shown in the alert dialog")
+        alert.informativeText = NSLocalizedString("This display has no brightness range above the standard maximum, so XDR extended brightness cannot be enabled on it.", comment: "Shown in the alert dialog")
+        alert.alertStyle = .informational
+        alert.runModal()
+      }
+    }
+  }
+
   func updateMenuRelevantDisplay() {
     if prefs.integer(forKey: PrefKey.multiSliders.rawValue) == MultiSliders.relevant.rawValue {
       if let display = DisplayManager.shared.getCurrentDisplay(), display.identifier != self.lastMenuRelevantDisplayId {
@@ -253,13 +319,24 @@ class MenuHandler: NSMenu, NSMenuDelegate {
   func addDefaultMenuOptions() {
     if !DEBUG_MACOS10, #available(macOS 11.0, *), prefs.integer(forKey: PrefKey.menuItemStyle.rawValue) == MenuItemStyle.icon.rawValue {
       let iconSize = CGFloat(18)
-      let viewWidth = max(130, self.size.width)
-      var compensateForBlock: CGFloat = 0
-      if viewWidth > 230 { // if there are display blocks, we need to compensate a bit for the negative inset of the blocks
-        compensateForBlock = 4
-      }
+      // Derive the width from the item views we just added rather than from `self.size`.
+      // This method runs at launch, on display changes and on XDR toggles — almost always
+      // while the menu is closed — and NSMenu.size is then zero or stale. The old
+      // `max(130, self.size.width)` therefore produced a 130 pt view while the real
+      // content is 248-274 pt wide, which put these buttons in the middle of the menu, on
+      // top of the sliders (and on top of the gear button's own hit area, so reaching for
+      // a slider hit the gear instead).
+      let showPercent = prefs.bool(forKey: PrefKey.enableSliderPercent.rawValue)
+      let contentWidth = self.items.compactMap { $0.view?.frame.width }.max() ?? 0
+      let viewWidth = max(contentWidth, MenuMetrics.itemWidth(showPercent: showPercent))
+      let buttonGap: CGFloat = 14
 
-      let menuItemView = NSView(frame: NSRect(x: 0, y: 0, width: viewWidth, height: iconSize + 10))
+      let menuItemView = NSView(frame: NSRect(x: 0, y: 0, width: viewWidth, height: iconSize + 12))
+      let buttonY = (menuItemView.frame.height - iconSize) / 2
+      // Line the buttons up with the trailing edge of the card (or of the slider row when
+      // no card is drawn). MenuMetrics.outerMargin is that inset in both cases.
+      let quitX = viewWidth - MenuMetrics.outerMargin - iconSize
+      let settingsX = quitX - buttonGap - iconSize
 
       let settingsIcon = NSButton()
       settingsIcon.bezelStyle = .regularSquare
@@ -268,7 +345,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       settingsIcon.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: NSLocalizedString("Settings…", comment: "Shown in menu"))
       settingsIcon.alternateImage = NSImage(systemSymbolName: "gearshape.fill", accessibilityDescription: NSLocalizedString("Settings…", comment: "Shown in menu"))
       settingsIcon.alphaValue = 0.3
-      settingsIcon.frame = NSRect(x: menuItemView.frame.maxX - iconSize * 2 - 14 - 17 + compensateForBlock, y: menuItemView.frame.origin.y + 5, width: iconSize, height: iconSize)
+      settingsIcon.frame = NSRect(x: settingsX, y: buttonY, width: iconSize, height: iconSize)
       settingsIcon.imageScaling = .scaleProportionallyUpOrDown
       settingsIcon.action = #selector(app.prefsClicked)
 
@@ -280,7 +357,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       quitIcon.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: NSLocalizedString("Quit", comment: "Shown in menu"))
       quitIcon.alternateImage = NSImage(systemSymbolName: symbolName + ".fill", accessibilityDescription: NSLocalizedString("Quit", comment: "Shown in menu"))
       quitIcon.alphaValue = 0.3
-      quitIcon.frame = NSRect(x: menuItemView.frame.maxX - iconSize - 17 + compensateForBlock, y: menuItemView.frame.origin.y + 5, width: iconSize, height: iconSize)
+      quitIcon.frame = NSRect(x: quitX, y: buttonY, width: iconSize, height: iconSize)
       quitIcon.imageScaling = .scaleProportionallyUpOrDown
       quitIcon.action = #selector(app.quitClicked)
 

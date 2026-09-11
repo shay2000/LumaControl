@@ -1192,7 +1192,7 @@
         <scene sceneID="lLH-hh-1EK">
             <objects>
                 <customObject id="rw7-Po-Lxm" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <viewController storyboardIdentifier="DisplaysPrefsVC" id="2Ei-9P-f0u" customClass="DisplaysPrefsViewController" customModule="MonitorControl" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="DisplaysPrefsVC" id="2Ei-9P-f0u" customClass="DisplaysPrefsViewController" customModule="MonitorControl" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" translatesAutoresizingMaskIntoConstraints="NO" id="aj0-6l-QE2">
                         <rect key="frame" x="0.0" y="0.0" width="730" height="533"/>
                         <subviews>
@@ -1253,7 +1253,7 @@
                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                     <prototypeCellViews>
-                                                        <tableCellView wantsLayer="YES" id="hCY-wr-B84" customClass="DisplaysPrefsCellView" customModule="MonitorControl">
+                                                        <tableCellView wantsLayer="YES" id="hCY-wr-B84" customClass="DisplaysPrefsCellView" customModule="MonitorControl" customModuleProvider="target">
                                                             <rect key="frame" x="17" y="0.0" width="688" height="520"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                             <subviews>
@@ -1949,7 +1949,7 @@
         <!--About Prefs View Controller-->
         <scene sceneID="Ot2-lL-eIg">
             <objects>
-                <viewController storyboardIdentifier="AboutPrefsVC" id="7uI-eE-yxm" customClass="AboutPrefsViewController" customModule="MonitorControl" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AboutPrefsVC" id="7uI-eE-yxm" customClass="AboutPrefsViewController" customModule="MonitorControl" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kXT-i4-NNT">
                         <rect key="frame" x="0.0" y="0.0" width="730" height="308"/>
                         <subviews>

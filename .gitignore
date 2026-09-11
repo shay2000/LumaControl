@@ -9,8 +9,11 @@ xcuserdata/
 
 ### Local build outputs (build/build.sh stays tracked) ###
 build/DerivedData/
+build/DerivedData*/
 build/DerivedDataSigned/
 build/dmg-staging/
 build/*.app
 build/*.dmg
 build/*.log
+### Agent workspace memory (local only) ###
+.workbuddy-ai/

@@ -52,6 +52,7 @@
 		AADB625A26BC196900DFFAA5 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AADB625926BC196900DFFAA5 /* DisplayServices.framework */; };
 		F01B0699228221B7008E64DB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F01B0680228221B6008E64DB /* Localizable.strings */; };
 		F01B069F228221B7008E64DB /* SliderHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01B068F228221B7008E64DB /* SliderHandler.swift */; };
+		F0ED00020000000000000002 /* XDREngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0ED00010000000000000001 /* XDREngine.swift */; };
 		F03A8DF21FFBAA6F0034DC27 /* OtherDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03A8DF11FFBAA6F0034DC27 /* OtherDisplay.swift */; };
 		F0445D3820023E710025AE82 /* MainPrefsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0445D3720023E710025AE82 /* MainPrefsViewController.swift */; };
 		F06792EA200A73460066C438 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06792E9200A73460066C438 /* main.swift */; };
@@ -171,6 +172,7 @@
 		F01B0685228221B6008E64DB /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		F01B0686228221B6008E64DB /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F01B068F228221B7008E64DB /* SliderHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SliderHandler.swift; sourceTree = "<group>"; };
+		F0ED00010000000000000001 /* XDREngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XDREngine.swift; sourceTree = "<group>"; };
 		F03A8DF11FFBAA6F0034DC27 /* OtherDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherDisplay.swift; sourceTree = "<group>"; };
 		F0445D3720023E710025AE82 /* MainPrefsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPrefsViewController.swift; sourceTree = "<group>"; };
 		F06792E7200A73460066C438 /* MonitorControlHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonitorControlHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -329,6 +331,7 @@
 				AA16139A26BE772E00DCF027 /* Arm64DDC.swift */,
 				AA4398A826DD55DA00943F16 /* IntelDDC.swift */,
 				FE4E0895249D584C003A50BB /* OSDUtils.swift */,
+				F0ED00010000000000000001 /* XDREngine.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -721,6 +724,7 @@
 				AA99521726FE25AB00612E07 /* AppDelegate.swift in Sources */,
 				AA25F6D126E681D30087F3A2 /* KeyboardPrefsViewController.swift in Sources */,
 				F01B069F228221B7008E64DB /* SliderHandler.swift in Sources */,
+				F0ED00020000000000000002 /* XDREngine.swift in Sources */,
 				AACE5E2327050C63006C2A48 /* NSNotification+Extension.swift in Sources */,
 				AA25F6CF26E680510087F3A2 /* MenuslidersPrefsViewController.swift in Sources */,
 				AA4398A926DD55DA00943F16 /* IntelDDC.swift in Sources */,
@@ -900,7 +904,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -956,7 +960,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -986,7 +990,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControl;
 				PRODUCT_NAME = XDRMonitorControl;
@@ -1024,7 +1028,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControl;
 				PRODUCT_NAME = XDRMonitorControl;
@@ -1061,7 +1065,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1092,7 +1096,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1113,7 +1117,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1134,7 +1138,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shay2000.XDRMonitorControlTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

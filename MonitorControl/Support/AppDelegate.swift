@@ -38,14 +38,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
+  /// The storyboard-backed preference panes, in display order.
+  ///
+  /// Panes that fail to load are skipped and logged rather than force-unwrapped. A
+  /// storyboard scene whose `customModule` does not match the app's product module
+  /// resolves to nil at runtime, and force-unwrapping that used to trap the whole app
+  /// the first time the settings window was needed (menu gear button, app reopen).
+  private var settingsPanes: [SettingsPane] {
+    let candidates: [(identifier: String, pane: SettingsPane?)] = [
+      ("MainPrefsVC", mainPrefsVc),
+      ("MenuslidersPrefsVC", menuslidersPrefsVc),
+      ("KeyboardPrefsVC", keyboardPrefsVc),
+      ("DisplaysPrefsVC", displaysPrefsVc),
+      ("AboutPrefsVC", aboutPrefsVc),
+    ]
+    var panes: [SettingsPane] = []
+    for candidate in candidates {
+      if let pane = candidate.pane {
+        panes.append(pane)
+      } else {
+        os_log("Preference pane %{public}@ could not be loaded from the storyboard.", type: .error, candidate.identifier)
+      }
+    }
+    return panes
+  }
+
   lazy var settingsWindowController: SettingsWindowController = .init(
-    panes: [
-      mainPrefsVc!,
-      menuslidersPrefsVc!,
-      keyboardPrefsVc!,
-      displaysPrefsVc!,
-      aboutPrefsVc!,
-    ],
+    panes: self.settingsPanes,
     style: self.settingsPaneStyle,
     animated: true
   )
@@ -81,7 +100,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc func prefsClicked(_: AnyObject) {
     os_log("Settings clicked", type: .info)
+    guard !self.settingsPanes.isEmpty else {
+      self.showSettingsUnavailableAlert()
+      return
+    }
     self.settingsWindowController.show()
+  }
+
+  private func showSettingsUnavailableAlert() {
+    let alert = NSAlert()
+    alert.messageText = NSLocalizedString("Settings could not be opened", comment: "Shown in the alert dialog")
+    alert.informativeText = NSLocalizedString("The app's preference panes failed to load from its interface file. Reinstalling or rebuilding the app should resolve this.", comment: "Shown in the alert dialog")
+    alert.alertStyle = .warning
+    alert.runModal()
   }
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
@@ -91,6 +122,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationWillTerminate(_: Notification) {
     os_log("Goodbye!", type: .info)
+    // Hand the gamma table back before anything else. CoreGraphics restores it if we die
+    // without warning, but quitting is not an emergency and the ramp should go now.
+    XDREngine.shared.stop()
     DisplayManager.shared.resetSwBrightnessForAllDisplays(noPrefSave: true)
     self.updateStatusItemVisibility(true)
   }
@@ -117,10 +151,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       // This fork has no Sparkle update feed, so automatic update checks are off by default.
       prefs.set(false, forKey: PrefKey.SUEnableAutomaticChecks.rawValue)
     }
+    // Point the hardware volume keys at the display that is actually producing sound.
+    //
+    // The key is absent on a fresh install, and a missing integer reads back as 0 — which is
+    // `MultiKeyboardVolume.mouse`. That made the out-of-the-box behaviour "control whichever
+    // display the pointer happens to be over", so with the pointer on a display that has no
+    // DDC volume (or on the built-in panel, which is not DDC at all) the hardware keys did
+    // nothing whatsoever. macOS's own volume keys follow the *default audio output device*,
+    // so follow that too until the user chooses otherwise in Settings.
+    //
+    // Written once rather than resolved on every read, so the Settings popup shows the
+    // routing that is actually in effect. A value the user has set is never overwritten.
+    if prefs.object(forKey: PrefKey.multiKeyboardVolume.rawValue) == nil {
+      prefs.set(MultiKeyboardVolume.audioDeviceNameMatching.rawValue, forKey: PrefKey.multiKeyboardVolume.rawValue)
+    }
+    // Move the volume keys in 1% steps instead of snapping to the OSD's 16 chiclets.
+    //
+    // The coarse path in `OtherDisplay.calcNewValue` rounds to the nearest OSD chiclet, and
+    // the OSD has 16 of them, so a single press jumps 1/16 of the range — 6.25%, which reads
+    // as a step of 6 on a 0-100 display. That is far too coarse to land on a level you want.
+    // Passing `isSmallIncrement` moves 1% at a time and draws the OSD with 100 chiclets to
+    // match. Option+Shift still flips back to the coarse step for a quick sweep.
+    //
+    // This is the same setting as the "Use fine OSD scale for volume" checkbox in
+    // Settings > Keyboard; defaulting it on just means the keys feel smooth out of the box.
+    // A choice the user has already made is never overwritten.
+    if prefs.object(forKey: PrefKey.useFineScaleVolume.rawValue) == nil {
+      prefs.set(true, forKey: PrefKey.useFineScaleVolume.rawValue)
+    }
   }
 
-  @objc func displayReconfigured() {
+  @objc   func displayReconfigured() {
     DisplayManager.shared.resetSwBrightnessForAllDisplays(noPrefSave: true)
+    // The gamma table belongs to a specific display configuration. Hold onto it across a
+    // reconfiguration and it will be applied to a display that is no longer the one we
+    // measured.
+    XDREngine.shared.stop()
     CGDisplayRestoreColorSyncSettings()
     self.reconfigureID += 1
     self.updateMediaKeyTap()
@@ -155,6 +221,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DisplayManager.shared.restoreSwBrightnessForAllDisplays(async: !prefs.bool(forKey: PrefKey.disableSmoothBrightness.rawValue))
       }
     }
+    self.resumeXDRForAllDisplays()
     displaysPrefsVc?.loadDisplayList()
     self.job(start: true)
   }
@@ -163,11 +230,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     menu.updateMenus()
     self.keyboardShortcuts.updateRegistrations()
     self.updateMediaKeyTap()
+    self.updateStatusIcon()
   }
 
   func checkPermissions(firstAsk: Bool = false) {
     let permissionsRequired: Bool = [KeyboardVolume.media.rawValue, KeyboardVolume.both.rawValue].contains(prefs.integer(forKey: PrefKey.keyboardVolume.rawValue)) || [KeyboardBrightness.media.rawValue, KeyboardBrightness.both.rawValue].contains(prefs.integer(forKey: PrefKey.keyboardBrightness.rawValue))
-    if !MediaKeyTapManager.readPrivileges(prompt: false), permissionsRequired {
+    // Gate on the real capability, not `readPrivileges`. That call keeps reporting "trusted"
+    // after the app is re-signed, so it would decide there is nothing to do in precisely the
+    // situation this exists to catch — a grant that survived a rebuild and no longer matches.
+    if permissionsRequired, !MediaKeyTapManager.canInstallEventTap() {
       MediaKeyTapManager.acquirePrivileges(firstAsk: firstAsk)
     }
   }
@@ -186,6 +257,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @objc private func sleepNotification() {
     self.sleepID += 1
     os_log("Sleeping with sleep %{public}@", type: .info, String(self.sleepID))
+    // A boosted gamma table must not survive sleep: the panel comes back in SDR mode and
+    // would otherwise be left with a ramp written for a backlight that is no longer raised.
+    XDREngine.shared.stop()
     self.updateMediaKeyTap()
   }
 
@@ -214,6 +288,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
       self.startupActionWriteRepeatAfterSober()
       self.updateMediaKeyTap()
+      // The boost was dropped on the way to sleep. A wake that also reconfigured the
+      // displays picks it up through `configure()`, but a plain sleep/wake never gets there,
+      // so the panel would be left at its SDR maximum with the slider still reading 150%.
+      self.resumeXDRForAllDisplays()
+    }
+  }
+
+  /// Re-applies the XDR boost wherever it is meant to be on.
+  ///
+  /// Nothing writes the boost on its own — it only exists as long as a value above 1.0 has
+  /// been pushed through — so it has to be re-sent after launch and after a wake.
+  private func resumeXDRForAllDisplays() {
+    for display in DisplayManager.shared.displays {
+      (display as? AppleDisplay)?.resumeXDRIfNeeded()
     }
   }
 
@@ -345,8 +433,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private func setMenu() {
     menu = MenuHandler()
     menu.delegate = menu
-    self.statusItem.button?.image = NSImage(named: "status")
     self.statusItem.menu = menu
+    // The boost ramps in over a couple of seconds as macOS raises the backlight, so the
+    // icon cannot be driven from the places that rebuild the menu — it has to follow the
+    // engine. Without this the icon would lag the screen by seconds at both ends.
+    XDREngine.shared.onBoostActiveChanged = { [weak self] in
+      self?.updateStatusIcon()
+    }
+    self.updateStatusIcon()
+  }
+
+  /// Turns the menu bar icon yellow while a boost is actually brightening a display.
+  ///
+  /// Deliberately tied to the boost rather than to the setting: XDR can be enabled while
+  /// sitting at 80%, and reporting that as "on" would be a lie. The boost is also invisible
+  /// to everything else — it lives in the gamma table, not in any brightness value the
+  /// system reports — so the icon is the only signal there is.
+  func updateStatusIcon() {
+    let boosting = DisplayManager.shared.displays.contains { ($0 as? AppleDisplay)?.isXDRBoosting == true }
+    self.statusItem.button?.image = Self.statusIcon(xdrActive: boosting)
+  }
+
+  private static func statusIcon(xdrActive: Bool) -> NSImage? {
+    guard let base = NSImage(named: "status") else {
+      return nil
+    }
+    guard xdrActive else {
+      return base
+    }
+    // "status" is a template asset, so it draws as a black silhouette. Flooding that
+    // silhouette with yellow and clearing the template flag leaves a yellow icon — the
+    // template flag has to go, or the status bar would strip the colour straight back out.
+    let tinted = NSImage(size: base.size)
+    tinted.lockFocus()
+    let rect = NSRect(origin: .zero, size: base.size)
+    base.draw(in: rect, from: NSRect(origin: .zero, size: base.size), operation: .sourceOver, fraction: 1.0)
+    NSColor.systemYellow.setFill()
+    rect.fill(using: .sourceAtop)
+    tinted.unlockFocus()
+    tinted.isTemplate = false
+    return tinted
   }
 
   private func showSafeModeAlertIfNeeded() {

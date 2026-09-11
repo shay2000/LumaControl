@@ -256,16 +256,21 @@ class DisplayManager {
     os_log("Displays after sorting: %{public}@", after)
   }
   
-  func sortDisplaysByFriendlyName() -> [Display] {
-      return displays.sorted { lhs, rhs in
-          let lhsTitle = lhs.readPrefAsString(key: .friendlyName).isEmpty
-              ? lhs.name
-              : lhs.readPrefAsString(key: .friendlyName)
-          let rhsTitle = rhs.readPrefAsString(key: .friendlyName).isEmpty
-              ? rhs.name
-              : rhs.readPrefAsString(key: .friendlyName)
-          return lhsTitle.localizedStandardCompare(rhsTitle) == .orderedDescending
-      }
+  /// Sorts the given displays by their friendly name.
+  ///
+  /// The list is passed in explicitly. An earlier version sorted `self.displays` and
+  /// returned that, which silently discarded whatever filtering the caller had done —
+  /// notably the "hide Apple displays from menu" preference.
+  func sortDisplaysByFriendlyName(_ displays: [Display]) -> [Display] {
+    displays.sorted { lhs, rhs in
+      let lhsTitle = lhs.readPrefAsString(key: .friendlyName).isEmpty
+        ? lhs.name
+        : lhs.readPrefAsString(key: .friendlyName)
+      let rhsTitle = rhs.readPrefAsString(key: .friendlyName).isEmpty
+        ? rhs.name
+        : rhs.readPrefAsString(key: .friendlyName)
+      return lhsTitle.localizedStandardCompare(rhsTitle) == .orderedDescending
+    }
   }
 
 

@@ -3,6 +3,55 @@
 import Cocoa
 import os.log
 
+/// Shared geometry for the popout menu.
+///
+/// Every element derives from these values so that the slider rows, the display "card"
+/// and the settings/quit row all sit on one content column. Each of those three used to
+/// carry its own magic offsets (13, 12, 15, `13 + 13`, `-12`), which is how the icon
+/// ended up straddling the card border and the icon, label and slider drifted onto three
+/// different left edges.
+enum MenuMetrics {
+  /// Gap between the menu item's edge and the outside of the card.
+  static let outerMargin: CGFloat = 6
+  /// Gap between the card's edge and its content.
+  static let cardPadding: CGFloat = 10
+  /// Horizontal inset from the content edge to an icon.
+  static let iconGutter: CGFloat = 6
+  /// Menu items follow the 16 pt icon convention.
+  static let iconSize: CGFloat = 16
+  /// Gap between an icon and the control it labels.
+  static let iconToControl: CGFloat = 8
+  /// Height of the slider control itself.
+  static let sliderHeight: CGFloat = 16
+  /// Equal padding above and below the slider, so the control is centred in its row.
+  static let rowPadding: CGFloat = 7
+  /// Gap between the last slider and the display name label.
+  static let labelGap: CGFloat = 8
+  static let sliderWidth: CGFloat = 180
+  static let percentWidth: CGFloat = 34
+  static let percentGap: CGFloat = 6
+
+  /// x offset of the slider inside a row view.
+  static var controlInset: CGFloat { iconGutter + iconSize + iconToControl }
+  /// Height of one slider row.
+  static var rowHeight: CGFloat { sliderHeight + rowPadding * 2 }
+
+  /// Width of one slider row.
+  static func rowWidth(showPercent: Bool) -> CGFloat {
+    controlInset + sliderWidth + (showPercent ? percentGap + percentWidth : 0) + iconGutter
+  }
+
+  /// Width of the display card: the row plus padding on both sides.
+  static func cardWidth(showPercent: Bool) -> CGFloat {
+    rowWidth(showPercent: showPercent) + cardPadding * 2
+  }
+
+  /// Width of a menu item view, including the margin outside the card.
+  static func itemWidth(showPercent: Bool) -> CGFloat {
+    cardWidth(showPercent: showPercent) + outerMargin * 2
+  }
+}
+
 class SliderHandler {
   var slider: MCSlider?
   var view: NSView?
@@ -14,21 +63,35 @@ class SliderHandler {
   var icon: ClickThroughImageView?
 
   class MCSliderCell: NSSliderCell {
-    let knobFillColor = NSColor(white: 1, alpha: 1)
-    let knobFillColorTracking = NSColor(white: 0.8, alpha: 1)
+    // These must be dynamic (appearance-resolving) colours. Hard-coding white here and
+    // black on the icon meant one of the two was always invisible: a white knob and fill
+    // vanish into a light menu, a black icon vanishes into a dark or glassy one.
+    let knobFillColor = NSColor.labelColor
+    let knobFillColorTracking = NSColor.labelColor.withAlphaComponent(0.8)
     let knobStrokeColor = NSColor.systemGray.withAlphaComponent(0.5)
     let knobShadowColor = NSColor(white: 0, alpha: 0.03)
     let barFillColor = NSColor.systemGray.withAlphaComponent(0.2)
     let barStrokeColor = NSColor.systemGray.withAlphaComponent(0.5)
-    let barFilledFillColor = NSColor(white: 1, alpha: 1)
-    let barXDRFillColor = NSColor.systemRed.withAlphaComponent(0.7)
-    let highlightDisplayIndicatorColor = NSColor(white: 0.85, alpha: 1) // This is visible if there is more the 2 displays
+    let barFilledFillColor = NSColor.labelColor
+    // Extended (XDR/HDR) brightness ramp. Anchored to the value scale rather than to the
+    // filled width, so a given brightness always reads the same colour.
+    let barXDRStartColor = NSColor.systemYellow
+    let barXDRMidColor = NSColor.systemOrange
+    let barXDREndColor = NSColor.systemRed
+    let xdrThresholdMarkerColor = NSColor.labelColor.withAlphaComponent(0.35)
+    let highlightDisplayIndicatorColor = NSColor.labelColor.withAlphaComponent(0.85) // This is visible if there is more the 2 displays
     let tickMarkColor = NSColor.systemGray.withAlphaComponent(0.5)
     var isXDRSlider: Bool = false
 
+    /// Called after the user releases the slider. Used to offer the XDR opt-in once the
+    /// drag has finished, rather than while it is still tracking.
+    var onTrackingEnded: (() -> Void)?
+
     let inset: CGFloat = 3.5
-    let offsetX: CGFloat = -1.5
-    let offsetY: CGFloat = -1.5
+    // `barRect` insets symmetrically around the knob, so the old (-1.5, -1.5) optical
+    // offset only served to push the track off-centre in its row.
+    let offsetX: CGFloat = 0
+    let offsetY: CGFloat = 0
 
     let tickMarkKnobExtraInset: CGFloat = 4
     let tickMarkKnobExtraRadiusMultiplier: CGFloat = 0.25
@@ -60,7 +123,9 @@ class SliderHandler {
 
     override func stopTracking(last lastPoint: NSPoint, current stopPoint: NSPoint, in controlView: NSView, mouseIsUp flag: Bool) {
       self.isTracking = false
-      return super.stopTracking(last: lastPoint, current: stopPoint, in: controlView, mouseIsUp: flag)
+      let result = super.stopTracking(last: lastPoint, current: stopPoint, in: controlView, mouseIsUp: flag)
+      self.onTrackingEnded?()
+      return result
     }
 
     override func drawKnob(_ knobRect: NSRect) {
@@ -97,16 +162,28 @@ class SliderHandler {
       self.barFilledFillColor.setFill()
       barFilled.fill()
 
-      // XDR red zone: overdraw the portion above normal max (1.0) in red
-      if self.isXDRSlider, sliderMax > 1.0, maxNorm > 1.0 / sliderMax {
-        let xdrThresholdNorm = CGFloat(1.0 / sliderMax)
-        let xdrStartX = aRect.origin.x + (aRect.width - aRect.height) * xdrThresholdNorm
-        NSGraphicsContext.saveGraphicsState()
-        barFilled.addClip()
-        let xdrOverlay = NSBezierPath(rect: NSRect(x: xdrStartX, y: aRect.origin.y - 1, width: aRect.width, height: aRect.height + 2))
-        self.barXDRFillColor.setFill()
-        xdrOverlay.fill()
-        NSGraphicsContext.restoreGraphicsState()
+      // Extended brightness zone. Everything above the standard maximum (1.0) is drawn as a
+      // yellow → orange → red ramp, so the fill itself tells the user they have left normal
+      // brightness. The gradient is anchored to the value scale (1.0 → panel maximum)
+      // rather than to the filled width, so a given brightness always reads the same
+      // colour, and it is clipped to the filled area so it only shows once the user
+      // actually pushes past the threshold.
+      if self.isXDRSlider, sliderMax > 1.0 {
+        let xdrThresholdNorm = 1.0 / sliderMax
+        let thresholdX = aRect.origin.x + (aRect.width - aRect.height) * CGFloat(xdrThresholdNorm)
+        if maxNorm > xdrThresholdNorm {
+          NSGraphicsContext.saveGraphicsState()
+          barFilled.addClip()
+          let xdrRect = NSRect(x: thresholdX, y: aRect.origin.y - 1,
+                               width: max(1, aRect.maxX - thresholdX), height: aRect.height + 2)
+          if let gradient = NSGradient(colors: [self.barXDRStartColor, self.barXDRMidColor, self.barXDREndColor]) {
+            gradient.draw(in: xdrRect, angle: 0)
+          }
+          NSGraphicsContext.restoreGraphicsState()
+        }
+        // Marks where standard brightness ends and extended brightness begins.
+        self.xdrThresholdMarkerColor.setFill()
+        NSBezierPath(rect: NSRect(x: thresholdX, y: aRect.origin.y, width: 1, height: aRect.height)).fill()
       }
 
       let knobMinX = aRect.origin.x + (aRect.width - aRect.height) * CGFloat(minNorm)
@@ -234,11 +311,25 @@ class SliderHandler {
     slider.isEnabled = true
     slider.setNumOfCustomTickmarks(prefs.bool(forKey: PrefKey.showTickMarks.rawValue) ? 5 : 0)
     self.slider = slider
+    // Offer the XDR opt-in when the drag ends rather than mid-drag: running a modal alert
+    // from inside the slider's action fights the menu's event loop. The hop to the next
+    // main-queue turn also keeps it out of AppKit's tracking teardown.
+    (slider.cell as? MCSliderCell)?.onTrackingEnded = { [weak self] in
+      DispatchQueue.main.async {
+        self?.handleSliderTrackingEnded()
+      }
+    }
     if !DEBUG_MACOS10, #available(macOS 11.0, *) {
-      slider.frame.size.width = 180
-      slider.frame.origin = NSPoint(x: 15, y: 5)
-      let view = NSView(frame: NSRect(x: 0, y: 0, width: slider.frame.width + 30 + (showPercent ? 38 : 0), height: slider.frame.height + 14))
-      view.frame.origin = NSPoint(x: 12, y: 0)
+      // Everything here is derived from MenuMetrics so the row is symmetric and lines up
+      // with the display card and the settings/quit row. The row's origin is deliberately
+      // left at (0, 0): the container positions it.
+      slider.frame = NSRect(x: MenuMetrics.controlInset,
+                            y: (MenuMetrics.rowHeight - MenuMetrics.sliderHeight) / 2,
+                            width: MenuMetrics.sliderWidth,
+                            height: MenuMetrics.sliderHeight)
+      let view = NSView(frame: NSRect(x: 0, y: 0,
+                                      width: MenuMetrics.rowWidth(showPercent: showPercent),
+                                      height: MenuMetrics.rowHeight))
       var iconName = "circle.dashed"
       switch command {
       case .audioSpeakerVolume: iconName = "speaker.wave.2.fill"
@@ -248,14 +339,24 @@ class SliderHandler {
       }
       let icon = SliderHandler.ClickThroughImageView()
       icon.image = NSImage(systemSymbolName: iconName, accessibilityDescription: title)
-      icon.contentTintColor = NSColor.black.withAlphaComponent(0.6)
-      icon.frame = NSRect(x: view.frame.origin.x + 6.5, y: view.frame.origin.y + 13, width: 15, height: 15)
+      // Dynamic tint: a fixed black tint is invisible on a dark or glassy menu.
+      icon.contentTintColor = NSColor.secondaryLabelColor
+      // Centred in the gutter and to the left of the slider. This used to be placed with
+      // `view.frame.origin.x + 6.5`, which resolved to x 18.5 and landed on top of a
+      // slider starting at x 15.
+      icon.frame = NSRect(x: MenuMetrics.iconGutter,
+                          y: (MenuMetrics.rowHeight - MenuMetrics.iconSize) / 2,
+                          width: MenuMetrics.iconSize,
+                          height: MenuMetrics.iconSize)
       icon.imageAlignment = .alignCenter
       view.addSubview(slider)
       view.addSubview(icon)
       self.icon = icon
       if showPercent {
-        let percentageBox = NSTextField(frame: NSRect(x: 15 + slider.frame.size.width - 2, y: 17, width: 40, height: 12))
+        let percentageBox = NSTextField(frame: NSRect(x: MenuMetrics.controlInset + MenuMetrics.sliderWidth + MenuMetrics.percentGap,
+                                                      y: (MenuMetrics.rowHeight - 12) / 2,
+                                                      width: MenuMetrics.percentWidth,
+                                                      height: 12))
         self.setupPercentageBox(percentageBox)
         self.percentageBox = percentageBox
         view.addSubview(percentageBox)
@@ -301,7 +402,9 @@ class SliderHandler {
       self.setValue(value, displayID: otherDisplay.identifier)
     } else if let appleDisplay = display as? AppleDisplay {
       if self.command == .brightness {
-        self.setValue(appleDisplay.getAppleBrightness(), displayID: appleDisplay.identifier)
+        // Effective, not raw: with a boost applied the raw reading is pinned at 1.0 and
+        // would park the thumb at the 100% mark of the extended range.
+        self.setValue(appleDisplay.effectiveBrightness, displayID: appleDisplay.identifier)
       }
     }
   }
@@ -352,41 +455,50 @@ class SliderHandler {
       }
     }
     self.percentageBox?.stringValue = String(Int(value * 100)) + "%"
-    var didPromptXDRThisDrag = false
     for display in self.displays {
       slider.setHighlightItem(display.identifier, value: value)
       if self.command == .brightness, let appleDisplay = display as? AppleDisplay {
-        if appleDisplay.isXDRCapable, !appleDisplay.readPrefAsBool(key: .xdrEnabled), !appleDisplay.xdrPromptShown, !didPromptXDRThisDrag, value >= 0.999 {
-          // Ask once per display per app session, and only once per drag,
-          // so a cancelled dialog can't reappear while the slider is still moving.
-          appleDisplay.xdrPromptShown = true
-          didPromptXDRThisDrag = true
-          let alert = NSAlert()
-          alert.messageText = NSLocalizedString("Enable XDR Extended Brightness?", comment: "Shown in the alert dialog")
-          alert.informativeText = NSLocalizedString("XDR mode allows brightness above the standard maximum. This may increase heat and reduce battery life, and the display may auto-dim in some conditions.\n\nAfter enabling, drag the slider to the right to set extended brightness.", comment: "Shown in the alert dialog")
-          alert.addButton(withTitle: NSLocalizedString("Enable XDR Brightness", comment: "Shown in the alert dialog"))
-          alert.addButton(withTitle: NSLocalizedString("Cancel", comment: "Shown in the alert dialog"))
-          alert.alertStyle = .warning
-          if alert.runModal() == .alertFirstButtonReturn {
-            appleDisplay.savePref(true, key: .xdrEnabled)
-            appleDisplay.savePref(true, key: .xdrWarningAcknowledged)
-            self.updateSliderXDRRange()
-          } else {
-            // XDR stays disabled for this display: clamp only this display to its standard
-            // maximum and leave the shared slider value untouched so other displays that may
-            // already be in the XDR range keep their brightness.
-            let appliedValue = min(value, appleDisplay.brightnessMaxValue)
-            slider.setHighlightItem(display.identifier, value: appliedValue)
-            _ = appleDisplay.setBrightness(appliedValue)
-            continue
-          }
-        }
+        // setBrightness clamps to the display's own maximum, so a value beyond the current
+        // range is safely reduced instead of being rejected.
         _ = appleDisplay.setBrightness(value)
       } else if let otherDisplay = display as? OtherDisplay {
         self.valueChangedOtherDisplay(otherDisplay: otherDisplay, value: value)
       }
     }
     slider.setDisplayHighlightItems(false)
+  }
+
+  /// Runs once the user lets go of the slider.
+  ///
+  /// This is where the XDR opt-in is offered. It used to be offered from inside
+  /// `valueChanged`, which meant a modal alert was presented while the slider was still
+  /// tracking and the menu's event loop was unwinding.
+  private func handleSliderTrackingEnded() {
+    guard self.command == .brightness, let slider = self.slider else {
+      return
+    }
+    let value = slider.floatValue
+    for display in self.displays {
+      guard let appleDisplay = display as? AppleDisplay else {
+        continue
+      }
+      // Only relevant when the user actually pushed up to the ceiling.
+      guard value >= appleDisplay.brightnessMaxValue - 0.001 else {
+        continue
+      }
+      guard appleDisplay.canOfferXDR else {
+        continue
+      }
+      if appleDisplay.promptToEnableXDR() {
+        self.updateSliderXDRRange()
+      } else {
+        // XDR stays off for this display: bring the slider back down to its real maximum.
+        let appliedValue = min(value, appleDisplay.brightnessMaxValue)
+        slider.floatValue = appliedValue
+        slider.setHighlightItem(display.identifier, value: appliedValue)
+      }
+      return
+    }
   }
 
   func updateIcon() {

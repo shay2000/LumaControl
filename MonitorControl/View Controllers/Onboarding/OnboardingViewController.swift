@@ -30,7 +30,9 @@ class OnboardingViewController: NSViewController {
     let volumePermissions: Bool = [KeyboardVolume.media.rawValue, KeyboardVolume.both.rawValue].contains(prefs.integer(forKey: PrefKey.keyboardVolume.rawValue))
     let brigthnessPermissions: Bool = [KeyboardBrightness.media.rawValue, KeyboardBrightness.both.rawValue].contains(prefs.integer(forKey: PrefKey.keyboardBrightness.rawValue))
     let permissionsRequired: Bool = volumePermissions || brigthnessPermissions
-    let enabled: Bool = !MediaKeyTapManager.readPrivileges(prompt: false) && permissionsRequired
+    // Ask the real capability test rather than `readPrivileges`, which stays optimistic after
+    // a re-sign and would show the tick even though the keys cannot work.
+    let enabled: Bool = !MediaKeyTapManager.canInstallEventTap() && permissionsRequired
     self.permissionsButton.image = enabled ? nil : NSImage(named: "onboarding_icon_checkmark")
   }
 }

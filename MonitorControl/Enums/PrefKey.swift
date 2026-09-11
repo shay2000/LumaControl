@@ -134,8 +134,11 @@ enum PrefKey: String {
   // XDR maximum brightness value for display
   case xdrMaxBrightness
 
-  // XDR capability probe already performed for display
-  case xdrProbed
+  // The "Don't warn me again" box was ticked on the XDR warning for this display
+  case xdrDontWarnAgain
+
+  // The answer stored with that tick: true to go into XDR silently, false to stay at 100%
+  case xdrAutoEnable
 
   /* -- Display+Command specific settings -- */
 

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" data-page-node-id="txqDnQbsW5efikT2cVqeI3">
+<head data-page-node-id="WCgKvz160YWv4pRHuWuDoY">
+<meta charset="utf-8" data-page-node-id="sgtnfHVjqN137lu0YT0Nkz">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="IXmAKZGiydiL2FXAep5tAM">
+<title>XDRMonitorControl — build 21: the permission flow, fixed</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1e222b;
+    --line: #2a2f3a;
+    --text: #e8eaf0;
+    --muted: #9aa3b2;
+    --dim: #6b7484;
+    --accent: #6ea8fe;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-2: #f0f2f5;
+      --line: #dfe3e9;
+      --text: #1a1d23;
+      --muted: #5b6472;
+      --dim: #8b93a1;
+      --accent: #2563eb;
+      --good: #15803d;
+      --warn: #b45309;
+      --bad: #b91c1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  header { margin-bottom: 44px; }
+  .kicker {
+    font: 600 12px/1 var(--mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 34px; line-height: 1.22; margin: 0 0 14px; letter-spacing: -.02em; }
+  .lede { font-size: 18px; color: var(--muted); margin: 0; max-width: 64ch; }
+
+  h2 {
+    font-size: 21px; margin: 52px 0 16px; letter-spacing: -.01em;
+    padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 16px; margin: 28px 0 10px; color: var(--text); }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+
+  .callout {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+  }
+  .callout.good { border-left-color: var(--good); }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .label {
+    font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); display: block; margin-bottom: 8px;
+  }
+
+  code {
+    font: 13px/1.5 var(--mono);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+
+  /* Sidebar path mock */
+  .path {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 6px;
+    margin: 22px 0;
+    overflow: hidden;
+  }
+  .path-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; border-radius: 7px;
+    font-size: 14px; color: var(--muted);
+  }
+  .path-row .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--dim); flex: none;
+  }
+  .path-row.head { color: var(--text); font-weight: 600; }
+  .path-row.head .dot { background: var(--accent); }
+  .path-row.target {
+    background: var(--panel-2); color: var(--text); font-weight: 600;
+    border: 1px solid var(--line);
+  }
+  .path-row.target .dot { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent); }
+  .path-row .indent { padding-left: 20px; display: flex; align-items: center; gap: 10px; }
+  .path-row .arrow { color: var(--dim); font-family: var(--mono); font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  th {
+    font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); border-bottom-color: var(--line);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.mono { font-family: var(--mono); font-size: 13px; }
+  .yes { color: var(--good); font-weight: 600; }
+  .no { color: var(--bad); font-weight: 600; }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 22px 0; }
+  ol.steps > li {
+    counter-increment: s;
+    position: relative;
+    padding: 0 0 22px 52px;
+    border-left: 1px solid var(--line);
+    margin-left: 16px;
+  }
+  ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.steps > li::before {
+    content: counter(s);
+    position: absolute; left: -17px; top: -2px;
+    width: 33px; height: 33px; border-radius: 50%;
+    background: var(--panel-2); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font: 600 13px/1 var(--mono); color: var(--text);
+  }
+  ol.steps > li strong { display: block; margin-bottom: 3px; }
+  ol.steps > li span { color: var(--muted); }
+
+  pre {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; margin: 16px 0;
+    font: 13px/1.6 var(--mono); color: var(--text);
+  }
+  pre .c { color: var(--dim); }
+  pre .g { color: var(--good); }
+  pre .r { color: var(--bad); }
+
+  footer {
+    margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--dim);
+  }
+</style>
+</head>
+<body data-page-node-id="lnMIHt65VzsPGQTxWX2NO2">
+<div class="wrap" data-page-node-id="a8cbmA2KS5wMnlWkZe3zVA">
+
+<header data-page-node-id="AlIIw3vcN8yZwtcNEFfV36">
+  <div class="kicker" data-page-node-id="LDZDMbHl92MHpUrHnhx84x">XDRMonitorControl · build 23</div>
+  <h1 data-page-node-id="cZoBiTyfo680w3ATExM3TV">The permission is still there.<br data-page-node-id="N7dCIj5Ou5sWMEPgXwOBln">Apple renamed it.</h1>
+  <p class="lede" data-page-node-id="yaZGdbGJHiBNy38dXzrlEV">
+    You were right that the flow changed on macOS 27 — but not the way either of us
+    expected. Nothing moved. The row you were looking for is called
+    <strong data-page-node-id="3BRvSyxAwdgnXHQol42XQY">“Device Control and Data Access”</strong> now, and it is sitting in exactly the
+    place Accessibility always was.
+  </p>
+</header>
+
+<div class="callout" data-page-node-id="PpGl1bAiIHZo6hxD6sjgTQ">
+  <span class="label" data-page-node-id="BoIEnlLIy8T0Y2BTvKKDiy">Short version</span>
+  <p data-page-node-id="GeA2H4XxXc5fkrfVPQE8Xy">
+    System Settings → <strong data-page-node-id="wZKJDC00Q8DQ8Djo54OBOE">Privacy &amp; Security</strong> → <strong data-page-node-id="dNoJTi4GJCDXD3TPB3wf45">Device Control and
+    Data Access</strong>. That last one used to say “Accessibility”.
+  </p>
+</div>
+
+<h2 data-page-node-id="HwEIbvfwYwM8CEEvlZ5osI">Where it actually lives</h2>
+
+<p data-page-node-id="DJ9qww0lKBbr9k4OegJ8Rk">
+  I didn't want to guess at this, so I opened the old link the app uses and read back the
+  window it produced. The title of that window is literally <em data-page-node-id="LIjesk4Ielya1uLd2a2YfV">Device Control and Data
+  Access</em>, and the app list inside it has the usual <strong data-page-node-id="HIIvZUXx9qD40wQ6PA3Hmp">+</strong> and
+  <strong data-page-node-id="UgEYQDfolm236WQ85DBcOn">–</strong> buttons. Your copy of XDRMonitorControl is already in that list with its
+  switch turned on.
+</p>
+
+<div class="path" data-page-node-id="zrkoYjXnqrCP3YFX8xlzxg">
+  <div class="path-row head" data-page-node-id="6dZOnoyDefIeTPjDz1RwCO"><span class="dot" data-page-node-id="7ZkOMDXFqpF46Aw6EL3zor"></span>System Settings</div>
+  <div class="path-row" data-page-node-id="CpWWHuO0F170iFlEg0tK9r"><span class="indent" data-page-node-id="2RLSopGwHI4SBwnUTuJnoe"><span class="dot" data-page-node-id="fhHRTZSs7lgnYxuAlY91aH"></span>Wi-Fi, Bluetooth, Network …</span></div>
+  <div class="path-row" data-page-node-id="IgYi31UemmQkc9zyZ259V2"><span class="indent" data-page-node-id="sVcC85mQNpKP2kjgd6W78e"><span class="dot" data-page-node-id="zi58HoYonzyKMHCHLOjwLH"></span>Notifications, Sound, Focus …</span></div>
+  <div class="path-row head" data-page-node-id="x3tPSxG3BgbCiTQ57KPhHS"><span class="indent" data-page-node-id="hemaqvSbXdrc9NwelIs9AT"><span class="dot" data-page-node-id="cV7XW21r2m1NU9wOsJyC5u"></span>Privacy &amp; Security</span></div>
+  <div class="path-row target" data-page-node-id="etSLT4JIsnvWIAHaiUkwtq">
+    <span class="indent" style="padding-left:44px" data-page-node-id="vtVaLCZNrLAxC2G7f3xkqX">
+      <span class="arrow" data-page-node-id="GYdDoBMq2R15O3tidj696W">└</span><span class="dot" data-page-node-id="AHUD54zqePdJJImJ8UrFse"></span>Device Control and Data Access
+    </span>
+  </div>
+</div>
+
+<p data-page-node-id="iWxyjNFMh48EtmICFbB0BF">
+  There is a <em data-page-node-id="D2nrT27wcUTmHMjj61f7ep">separate</em> pane called “Accessibility” in the sidebar too — the one with
+  VoiceOver, Zoom and Pointer Control. That is a different thing and it is not the one you
+  need. Easy to mistake, which is most of why this was confusing.
+</p>
+
+<h2 data-page-node-id="L2m76DAa9xeh5fuW6cObgg">The thing that was actually breaking</h2>
+
+<p data-page-node-id="HAag73ji0WkChwEmOkDlJG">
+  Here is the part worth knowing. The switch in that list has been reading <strong data-page-node-id="psxV30JZO914RwXxBlSM7h">on</strong>
+  the whole time, while the app was being refused permission anyway. That isn't a bug in the
+  list — it's how macOS records permissions, and it was being tripped by how I was building
+  the app.
+</p>
+
+<p data-page-node-id="7k3wmQ1eDFyNcy0LMVAmCI">
+  A permission is stored against the app's <em data-page-node-id="TVBRiw46H8bhKX5WZSYCVI">signature</em>. The builds I'd been giving you
+  were signed “ad-hoc”, which means the recorded signature is a fingerprint of that exact
+  build. Rebuild the app and the fingerprint changes — so the permission stops matching, while
+  the switch carries on saying “on”. Remove-and-re-add fixed it, until the next build wiped it
+  out again. That is why this kept coming back.
+</p>
+
+<table data-page-node-id="bIKg71lCA12gcAoIo8Y9M1">
+  <thead data-page-node-id="eoJ4UAoKIpEmkZBT3Q8SIq">
+    <tr data-page-node-id="AYqtsP6RoC6cnLrwOkzdsa"><th data-page-node-id="uBvy5fr9bHPAp0GwFaNxT9">How it's signed</th><th data-page-node-id="fhddYnGpEBpxe57voOiFPt">What the permission is tied to</th><th data-page-node-id="Nl9xHll5VapLvomVr9NGnp">Survives a rebuild?</th></tr>
+  </thead>
+  <tbody data-page-node-id="SvQvIcg9ykHooqsSknqznC">
+    <tr data-page-node-id="sj87mtWILnKhVfKHUTxenO">
+      <td data-page-node-id="98nIZzbgG2cBl2VAUwx9TZ">Ad-hoc <span style="color:var(--dim)" data-page-node-id="rDnxk5HzkAG9MwPbFVUXqW">(before)</span></td>
+      <td class="mono" data-page-node-id="nzgixA9Lo8M3An3h31H5sN">cdhash bc4b38b5…</td>
+      <td class="no" data-page-node-id="I3mlr7KWa9EEGUrJWnfCAR">No — every build</td>
+    </tr>
+    <tr data-page-node-id="DfxNh2UHOkKjFZoF0XDUKj">
+      <td data-page-node-id="NTjpOYuvG8Q0dJdEXZ1Oyd">Apple Development <span style="color:var(--dim)" data-page-node-id="01EP2YNbE9LiEZQkxJIpWp">(build 21)</span></td>
+      <td class="mono" data-page-node-id="H8hXHBP8VZvC5XbX4Z9pIi">identifier + certificate</td>
+      <td class="yes" data-page-node-id="CIDCViIxagzv38qGNWidzl">Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout good" data-page-node-id="KgaqT4gvNGiusDXStNiAii">
+  <span class="label" data-page-node-id="FXq4rkmqljk6BLNDfkEgJm">What changed — and the proof it worked</span>
+  <p data-page-node-id="A1JFKFALewBol8V0MIVjXV">
+    The app is now signed with your real Apple Development certificate rather than ad-hoc.
+    I found it already sitting in your keychain — the project was configured with the wrong
+    team ID, which is why builds had been quietly falling back to ad-hoc all along. The
+    permission is now tied to the certificate instead of the build, so
+    <strong data-page-node-id="TFNqC090ffxsDkP9R8Oa2F">this should be the last time you ever have to grant it.</strong>
+  </p>
+  <p>
+    Confirmed, not assumed: build 22 was installed over build 21 a few minutes later, and it
+    came up with its event tap already working — no re-grant, no alert. Build 23 repeated the
+    same test with the same result. That is precisely the thing that used to break on every
+    single build.
+  </p>
+  <p>
+    Build 23 also closed a related hole. The older check the app used to decide "is the
+    permission missing?" asked macOS a question that answers <em>yes</em> even when the answer
+    is no — so it would have stayed quiet in exactly the situation it existed for. It now asks
+    the real question, so if this ever goes wrong again the app will tell you instead of
+    silently doing nothing.
+  </p>
+</div>
+
+<h2 data-page-node-id="QcrLAUO7SVzw8YEDESkNpq">What to do — once</h2>
+
+<ol class="steps" data-page-node-id="MJTBJ1a24BuA4ez6lQNtk9">
+  <li data-page-node-id="HC0UOyk3J1USGYGEBGNoAT">
+    <strong data-page-node-id="QyH36B3QalRm4Dqt8Aq2GE">Open Privacy &amp; Security</strong>
+    <span data-page-node-id="3jzSl2W8eNnwBmUwQQdbsy">The app is showing you an alert right now with a button that takes you straight
+    there. Or do it by hand from System Settings.</span>
+  </li>
+  <li data-page-node-id="wSjQHY69JniHWUhwRykayF">
+    <strong data-page-node-id="EDcfVUbMd8fY3nnhR0RFKC">Choose “Device Control and Data Access”</strong>
+    <span data-page-node-id="4ZuaQ6vpUdp76Fr2WU9LmT">In the list of permissions. Scroll — it sits between the media and screen-recording
+    entries.</span>
+  </li>
+  <li data-page-node-id="N6h58WG9ARR2D5QXfcZEBb">
+    <strong data-page-node-id="xseCAu8sOzPaQVKDwnUjr1">Select XDRMonitorControl and press –</strong>
+    <span data-page-node-id="FelgJ7E9i2gKZ9bRZbTpoB">This clears the old, stale record. The switch being on does not mean it works.</span>
+  </li>
+  <li data-page-node-id="8AQiZ71vwApfsh2GwqGbJV">
+    <strong data-page-node-id="FOOyauR76VFpZdC7q4XGJG">Press + and add it back</strong>
+    <span data-page-node-id="IrAyiT1q49fh1tbpa9vEo9">Navigate to Applications and pick <code data-page-node-id="AU5OLP4Q7WRgbC5v5GNI9d">XDRMonitorControl</code>. Make sure the
+    switch is on afterwards.</span>
+  </li>
+  <li data-page-node-id="LYdk9R71y8Fgc49CzX6u7I">
+    <strong data-page-node-id="E9sWt9OdZrSsamio0cpDAC">Quit and reopen the app</strong>
+    <span data-page-node-id="kqzLwRi2LqhStlrb6HNh2c">Then the hardware brightness and volume keys should drive the monitors again.</span>
+  </li>
+</ol>
+
+<div class="callout warn" data-page-node-id="vvd1rEX843BDYrTf58Cnrv">
+  <span class="label" data-page-node-id="6ZbkC73fArs7CG8MqLaTaB">Note</span>
+  <p data-page-node-id="205QxIw1Ih8RiKIt54Wreh">
+    The keys only do anything when a monitor is actually connected — with nothing plugged in
+    the app deliberately stays out of the way and lets macOS handle the volume itself. So
+    test it docked.
+  </p>
+</div>
+
+<h2 data-page-node-id="QVO4mGXTmDmMQwCjo89zZf">Clearing out /Applications</h2>
+
+<p data-page-node-id="V3huoucVY0FwvRbhjCo6AF">
+  Done. Each install used to park the previous copy next to the app, so they'd been piling up
+  one per build. I've cleared them to the Trash (nothing hard-deleted — they're recoverable
+  if you want them) and taught the installer to clean up after itself, so they won't
+  accumulate again.
+</p>
+
+<table data-page-node-id="IQhUE2A7d2IlTqCfIWnXjR">
+  <thead data-page-node-id="3rgUPlKjQ90PZ1kD3rLDur"><tr data-page-node-id="ONy5dUCzeA0fwGAgbfaCmc"><th data-page-node-id="rbAnX3cnFTfANpSykLnZJU">Before</th><th data-page-node-id="UO6aLGL9keerkq1tkxit4w">After</th></tr></thead>
+  <tbody data-page-node-id="lmMliZESxVgAPn2B0NqIzF">
+    <tr data-page-node-id="9y32JOXtijxAZMkjOK43Ja"><td data-page-node-id="HFY4szsBxE3f95L1oEE7Cc">XDRMonitorControl.app <span style="color:var(--dim)" data-page-node-id="L6DnTsSwQ4OrAD86enIIEi">— build 14</span></td>
+        <td data-page-node-id="1uR5g7sRLSeRDYWjR8atA4">XDRMonitorControl.app <span style="color:var(--dim)" data-page-node-id="1s5HwcivkcdRSoxl03ErzB">— build 23, the only copy left</span></td></tr>
+    <tr data-page-node-id="0HDn9vkpKsvCIp5yz8HyvN"><td data-page-node-id="H7V1EQkl5qXbxOr0R6h4Hb">…backup-20260911 <span style="color:var(--dim)" data-page-node-id="DrCVwIV6QPqMeGHcUEq3Dt">— build 2</span></td><td style="color:var(--dim)" data-page-node-id="TP5vNSNJDduEZq8h8FUzGU">trashed</td></tr>
+    <tr data-page-node-id="ZfxBlbRaRbOLQmKLB0jCZa"><td data-page-node-id="CJez2WfkvOLPsnEt5JUyH1">…replaced-20260911-150226 <span style="color:var(--dim)" data-page-node-id="YSQny40CdW8pBFkPaurgC2">— build 11</span></td><td style="color:var(--dim)" data-page-node-id="GeiLU1Ib1ND2eTxhCSiv9W">trashed</td></tr>
+    <tr data-page-node-id="SarDKbN72ELG9FhG7zg2ZO"><td data-page-node-id="pZfOqxuUjJWGxRsmtDfGrC">…replaced-20260911-153025 <span style="color:var(--dim)" data-page-node-id="AwHsPPxhC4Xk5WDDPvrXwp">— build 14</span></td><td style="color:var(--dim)" data-page-node-id="p58YGjfUfDgaBKFyQLBQ9U">trashed</td></tr>
+    <tr data-page-node-id="0jMctulOXUb9KztIQcKTXV"><td data-page-node-id="Co2f2j1Wc7xoa9APnHtftG">…replaced-20260911-154255 <span style="color:var(--dim)" data-page-node-id="UpHvOgQruLKSXMgLgvhj4j">— debug build</span></td><td style="color:var(--dim)" data-page-node-id="A4S4F9JsdjWdALRvt7MWUF">trashed</td></tr>
+  </tbody>
+</table>
+
+<h2>Smooth volume control</h2>
+
+<p>
+  The volume keys were jumping 6% at a time. That wasn't a bug so much as an unlucky default:
+  the app rounds each press to the nearest block on the on-screen volume display, and that
+  display has 16 blocks — so one press moved 1/16 of the range, 6.25%, which lands as 6.
+</p>
+
+<p>
+  The app already has the answer built in, as a checkbox in Settings → Keyboard called
+  <strong>“Use fine OSD scale for volume”</strong>. It was simply off. Turning it on moves the
+  volume 1% per press and redraws the on-screen indicator with 100 blocks to match. I've made
+  it the default.
+</p>
+
+<table>
+  <thead><tr><th>One press of volume-up</th><th>Before</th><th>Now</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Change in monitor volume</td>
+      <td class="mono">0.125 → 0.1875 <span style="color:var(--dim)">(6%)</span></td>
+      <td class="mono">0.125 → 0.135 <span style="color:var(--dim)">(1%)</span></td>
+    </tr>
+    <tr>
+      <td>Presses to cross the full range</td>
+      <td>16</td>
+      <td class="yes">100</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <span class="label">Worth knowing</span>
+  <p>
+    Holding <strong>Option+Shift</strong> while pressing now gives you the old coarse jump, so
+    you still have a fast sweep when you want one. It's the reverse of how it worked before.
+  </p>
+  <p>
+    And if 1% ever feels too slow, untick that checkbox in Settings → Keyboard and you're back
+    to 16 steps.
+  </p>
+</div>
+
+<h2 data-page-node-id="jV3Yv2luRsJJYuOclSMKOq">Checking it worked</h2>
+
+<p data-page-node-id="NjuuVTC8mo0bIIHEbcBlpA">
+  If you want to confirm the app has actually got its event tap, this looks for the thread it
+  creates when it succeeds:
+</p>
+
+<pre data-page-node-id="Wts6hgBntAun84DsY36QUd"><span class="c" data-page-node-id="8EnTVysL7SnDlPAi8Z1Dji"># should print a "MediaKeyTap Runloop" thread</span>
+sample $(pgrep -f "XDRMonitorControl.app/Contents/MacOS/XDRMonitorControl") 2 -f /tmp/s.txt
+grep "MediaKeyTap Runloop" /tmp/s.txt
+
+<span class="c" data-page-node-id="zQaYcCDzm9BRMtDVCUKlEQ"># should show a certificate-based requirement, not a cdhash</span>
+codesign -d -r- /Applications/XDRMonitorControl.app</pre>
+
+<footer data-page-node-id="eIFt5eO9OzSpp3FjAyPqvM">
+  Build 23 · signed with Apple Development (team 4RMD48ZS4D) · universal, macOS 12.0+ ·
+  <span class="mono" data-page-node-id="x3zQHGuLGfrlul2qBRwCUQ">valid on disk / satisfies its Designated Requirement</span>
+</footer>
+
+</div>
+</body>
+</html>
