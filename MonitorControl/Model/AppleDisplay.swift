@@ -50,8 +50,13 @@ class AppleDisplay: Display {
     let readBackResult = DisplayServicesGetBrightness(self.identifier, &readBackBrightness)
     // Restore the original brightness.
     DisplayServicesSetBrightness(self.identifier, currentBrightness)
+    guard readBackResult == 0 else {
+      // A failed read-back is likely transient (e.g. right after wake) — don't cache it
+      // as a negative result, just probe again next time.
+      return
+    }
     self.savePref(true, key: .xdrProbed)
-    if readBackResult == 0, readBackBrightness > 1.0 {
+    if readBackBrightness > 1.0 {
       self.isXDRCapable = true
       self.xdrMaxValue = 1.5
       self.savePref(self.xdrMaxValue, key: .xdrMaxBrightness)

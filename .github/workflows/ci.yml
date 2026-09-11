@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -17,9 +20,12 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     steps:
+      # actions/checkout v4.2.2
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      # macOS' BSD sort supports -V (version sort); this picks the newest installed
+      # Xcode so the build uses the latest SDK (Liquid Glass on macOS 26).
       - name: Select latest Xcode (Liquid Glass SDK)
         run: |
           XCODE_PATH="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
@@ -46,9 +52,10 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER= \
             2>&1 | tee build/xcodebuild-test.log
 
+      # actions/upload-artifact v4.6.2
       - name: Upload test log
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: xcodebuild-test-log
           path: build/xcodebuild-test.log
@@ -59,9 +66,12 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 90
     needs: test
+    permissions:
+      contents: write # required to publish the release on tags
     steps:
+      # actions/checkout v4.2.2
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Select latest Xcode (Liquid Glass SDK)
         run: |
@@ -89,15 +99,17 @@ jobs:
           echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
 
+      # actions/upload-artifact v4.6.2
       - name: Upload DMG artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ env.DMG_NAME }}
           path: build/${{ env.DMG_NAME }}
 
+      # softprops/action-gh-release v2.3.4
       - name: Release DMG on tag
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@62c96d0c4e8a889135c1f3a25910db8dbe0e85f7
         with:
           files: build/${{ env.DMG_NAME }}
           generate_release_notes: true

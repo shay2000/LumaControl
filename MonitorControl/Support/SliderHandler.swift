@@ -372,11 +372,12 @@ class SliderHandler {
             appleDisplay.savePref(true, key: .xdrWarningAcknowledged)
             self.updateSliderXDRRange()
           } else {
-            value = 1.0
-            slider.floatValue = value
-            slider.setHighlightItem(display.identifier, value: value)
-            self.percentageBox?.stringValue = "100%"
-            _ = appleDisplay.setBrightness(value)
+            // XDR stays disabled for this display: clamp only this display to its standard
+            // maximum and leave the shared slider value untouched so other displays that may
+            // already be in the XDR range keep their brightness.
+            let appliedValue = min(value, appleDisplay.brightnessMaxValue)
+            slider.setHighlightItem(display.identifier, value: appliedValue)
+            _ = appleDisplay.setBrightness(appliedValue)
             continue
           }
         }
