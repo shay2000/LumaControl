@@ -14,6 +14,17 @@ private class StubbedBrightnessAppleDisplay: AppleDisplay {
   }
 }
 
+private final class RecordingBrightnessDisplay: Display {
+  var writes: [(value: Float, isMainThread: Bool)] = []
+  var onWrite: ((Float) -> Void)?
+
+  override func applySwBrightnessValue(_ value: Float, enforceGammaActivity: Bool) -> Bool {
+    self.writes.append((value, Thread.isMainThread))
+    self.onWrite?(value)
+    return true
+  }
+}
+
 // Tests for the XDR extended brightness logic. Uses dummy displays so no real
 // display is ever touched from the test suite.
 final class XDRBrightnessTests: XCTestCase {
@@ -130,5 +141,132 @@ final class XDRBrightnessTests: XCTestCase {
     XCTAssertEqual(self.otherDisplay.swBrightnessSemaphore.wait(timeout: .now()), .success)
     defer { self.otherDisplay.swBrightnessSemaphore.signal() }
     XCTAssertEqual(self.otherDisplay.swBrightnessSemaphore.wait(timeout: .now()), .timedOut)
+  }
+
+  func testSmoothBrightnessLatestDirectRequestWins() {
+    let display = RecordingBrightnessDisplay(3, name: "Recording Display", vendorNumber: 8_001, modelNumber: 4, serialNumber: 3, isDummy: true)
+    display.savePref(Float(1), key: .SwBrightness)
+    defer {
+      display.onWrite = nil
+      _ = display.setSwBrightness(1)
+      display.removePref(key: .SwBrightness)
+    }
+    let superseded = expectation(description: "first ramp step emitted")
+    let completed = expectation(description: "direct replacement completed")
+    let quiet = expectation(description: "old ramp stays cancelled")
+    var didReplace = false
+    var writesAtEndpoint = 0
+    display.onWrite = { value in
+      if !didReplace {
+        didReplace = true
+        superseded.fulfill()
+        DispatchQueue.main.async { XCTAssertTrue(display.setSwBrightness(0.8)) }
+      }
+      if value == display.swBrightnessTransform(value: 0.8) {
+        writesAtEndpoint = display.writes.count
+        completed.fulfill()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { quiet.fulfill() }
+      }
+    }
+
+    XCTAssertTrue(display.setSwBrightness(0.4, smooth: true))
+    wait(for: [superseded, completed, quiet], timeout: 1.0)
+
+    XCTAssertEqual(display.writes.count, writesAtEndpoint)
+    XCTAssertEqual(display.writes.last?.value ?? -1, display.swBrightnessTransform(value: 0.8), accuracy: 0.0001)
+  }
+
+  func testSmoothBrightnessLatestSmoothRequestReachesExactEndpointOnMain() {
+    let display = RecordingBrightnessDisplay(4, name: "Recording Display 2", vendorNumber: 8_002, modelNumber: 5, serialNumber: 4, isDummy: true)
+    display.savePref(Float(1), key: .SwBrightness)
+    defer {
+      display.onWrite = nil
+      _ = display.setSwBrightness(1)
+      display.removePref(key: .SwBrightness)
+    }
+    let superseded = expectation(description: "first ramp step emitted")
+    let completed = expectation(description: "smooth replacement completed")
+    let quiet = expectation(description: "old ramp stays cancelled")
+    var didReplace = false
+    var writesAtEndpoint = 0
+    display.onWrite = { value in
+      if !didReplace {
+        didReplace = true
+        superseded.fulfill()
+        DispatchQueue.main.async { XCTAssertTrue(display.setSwBrightness(0.7, smooth: true)) }
+      }
+      if value == display.swBrightnessTransform(value: 0.7) {
+        writesAtEndpoint = display.writes.count
+        completed.fulfill()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { quiet.fulfill() }
+      }
+    }
+
+    XCTAssertTrue(display.setSwBrightness(0.4, smooth: true))
+    wait(for: [superseded, completed, quiet], timeout: 1.0)
+
+    XCTAssertFalse(display.writes.isEmpty)
+    XCTAssertEqual(display.writes.count, writesAtEndpoint)
+    XCTAssertEqual(display.writes.last?.value ?? -1, display.swBrightnessTransform(value: 0.7), accuracy: 0.0001)
+    XCTAssertTrue(display.writes.allSatisfy { $0.isMainThread })
+  }
+
+  func testSmoothBrightnessWithNoDistanceWritesExactValueOnce() {
+    let display = RecordingBrightnessDisplay(5, name: "Recording Display 3", vendorNumber: 8_003, modelNumber: 6, serialNumber: 5, isDummy: true)
+    display.savePref(Float(0.5), key: .SwBrightness)
+    defer {
+      display.onWrite = nil
+      _ = display.setSwBrightness(1)
+      display.removePref(key: .SwBrightness)
+    }
+    let completed = expectation(description: "zero-distance write completed")
+    display.onWrite = { _ in completed.fulfill() }
+
+    XCTAssertTrue(display.setSwBrightness(0.5, smooth: true))
+    wait(for: [completed], timeout: 1.0)
+
+    XCTAssertEqual(display.writes.count, 1)
+    guard let write = display.writes.first else {
+      return XCTFail("Expected one smooth brightness write")
+    }
+    XCTAssertEqual(write.value, display.swBrightnessTransform(value: 0.5), accuracy: 0.0001)
+  }
+
+  func testSmoothBrightnessCancelsDuringReconfiguration() {
+    let display = RecordingBrightnessDisplay(6, name: "Recording Display 4", vendorNumber: 8_004, modelNumber: 7, serialNumber: 6, isDummy: true)
+    display.savePref(Float(1), key: .SwBrightness)
+    let previousReconfigureID = app.reconfigureID
+    defer {
+      display.onWrite = nil
+      _ = display.setSwBrightness(1)
+      app.reconfigureID = previousReconfigureID
+      display.removePref(key: .SwBrightness)
+    }
+    app.reconfigureID = 1
+
+    XCTAssertTrue(display.setSwBrightness(0.4, smooth: true))
+    let settled = expectation(description: "cancellation callback settled")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { settled.fulfill() }
+    wait(for: [settled], timeout: 1.0)
+    XCTAssertTrue(display.writes.isEmpty)
+  }
+
+  func testSmoothBrightnessCancelsDuringSleep() {
+    let display = RecordingBrightnessDisplay(7, name: "Recording Display 5", vendorNumber: 8_005, modelNumber: 8, serialNumber: 7, isDummy: true)
+    display.savePref(Float(1), key: .SwBrightness)
+    let previousSleepID = app.sleepID
+    defer {
+      display.onWrite = nil
+      _ = display.setSwBrightness(1)
+      app.sleepID = previousSleepID
+      display.removePref(key: .SwBrightness)
+    }
+    app.sleepID = 1
+
+    XCTAssertTrue(display.setSwBrightness(0.4, smooth: true))
+    let settled = expectation(description: "sleep cancellation callback settled")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { settled.fulfill() }
+    wait(for: [settled], timeout: 1.0)
+    XCTAssertTrue(display.writes.isEmpty)
   }
 }

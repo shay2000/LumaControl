@@ -116,6 +116,10 @@ final class XDREngine {
     self.requestedBoost = wanted
     self.activeDisplay = displayID
     self.start()
+    guard self.window != nil, self.metalLayer != nil, self.commandQueue != nil else {
+      self.stop()
+      return
+    }
     self.applyBoost()
   }
 
