@@ -60,6 +60,7 @@
 		F0A489C4279C71B200BEDFD6 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A489C3279C71B200BEDFD6 /* OnboardingViewController.swift */; };
 		FE4E0896249D584C003A50BB /* OSDUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4E0895249D584C003A50BB /* OSDUtils.swift */; };
 		E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */; };
+		E77C0DE000000000000000B3 /* SettingsPanesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000B1 /* SettingsPanesTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -185,6 +186,7 @@
 		FB5DB2902AD54C4600306223 /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		FE4E0895249D584C003A50BB /* OSDUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSDUtils.swift; sourceTree = "<group>"; };
 		E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XDRBrightnessTests.swift; sourceTree = "<group>"; };
+		E77C0DE000000000000000B1 /* SettingsPanesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPanesTests.swift; sourceTree = "<group>"; };
 		E77C0DE000000000000000A2 /* MonitorControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MonitorControlTests.xctest; path = MonitorControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -390,6 +392,7 @@
 			isa = PBXGroup;
 			children = (
 				E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */,
+				E77C0DE000000000000000B1 /* SettingsPanesTests.swift */,
 			);
 			path = MonitorControlTests;
 			sourceTree = "<group>";
@@ -745,6 +748,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */,
+				E77C0DE000000000000000B3 /* SettingsPanesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -996,7 +1000,6 @@
 				PRODUCT_NAME = LumaControl;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "MonitorControl/Support/Bridging-Header.h";
-				SWIFT_MODULE_NAME = XDRMonitorControl;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.5;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
@@ -1035,7 +1038,6 @@
 				PRODUCT_NAME = LumaControl;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "MonitorControl/Support/Bridging-Header.h";
-				SWIFT_MODULE_NAME = XDRMonitorControl;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.5;
 				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
