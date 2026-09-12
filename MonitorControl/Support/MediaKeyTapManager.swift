@@ -238,7 +238,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     }
     self.didReportMissingAccessibility = true
     DispatchQueue.main.async {
-      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "XDRMonitorControl"
+      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "LumaControl"
       let alert = NSAlert()
       alert.messageText = NSLocalizedString("Keyboard keys are not reaching the app", comment: "Shown in the alert dialog")
       alert.informativeText = String(format: NSLocalizedString("macOS is not letting %@ listen for the brightness and volume keys, so they cannot control your displays. The menu sliders still work.\n\nOpen System Settings > Privacy & Security, then choose \"%@\" in the list. Remove %@ from that list with the – button, then add it back with the + button.\n\nmacOS keeps showing the app as enabled after it has been rebuilt, because the permission is tied to the exact build. Removing and re-adding it records the current build.", comment: "Shown in the alert dialog"), appName, MediaKeyTapManager.accessibilityPaneName, appName)
@@ -305,7 +305,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     // alert stays silent in exactly the case it exists for.
     _ = self.readPrivileges(prompt: true)
     if !self.canInstallEventTap(), !firstAsk {
-      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "XDRMonitorControl"
+      let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "LumaControl"
       let alert = NSAlert()
       alert.messageText = NSLocalizedString("Shortcuts not available", comment: "Shown in the alert dialog")
       alert.informativeText = String(format: NSLocalizedString("You need to enable %@ in System Settings > Privacy & Security > \"%@\" for the keyboard shortcuts to work. If it is already enabled, remove it and add the current app again.", comment: "Shown in the alert dialog"), appName, MediaKeyTapManager.accessibilityPaneName)

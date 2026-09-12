@@ -26,8 +26,8 @@
 /* Class = "NSTextFieldCell"; title = "Using window focus might not work properly with full screen apps."; ObjectID = "4dX-o1-xAc"; */
 "4dX-o1-xAc.title" = "Používanie zamerania na okno nemusí fungovať správne s aplikáciami na celú obrazovku.";
 
-/* Class = "NSTextFieldCell"; title = "Welcome to MonitorControl"; ObjectID = "5J0-BD-top"; */
-"5J0-BD-top.title" = "Vitajte v MonitorControl";
+/* Class = "NSTextFieldCell"; title = "Welcome to LumaControl"; ObjectID = "5J0-BD-top"; */
+"5J0-BD-top.title" = "Vitajte v LumaControl";
 
 /* Class = "NSButtonCell"; title = "Reset Settings"; ObjectID = "5yT-5F-X5R"; */
 "5yT-5F-X5R.title" = "Obnoviť predvoľby";
@@ -47,8 +47,8 @@
 /* Class = "NSButtonCell"; title = "Use fine OSD scale for brightness and contrast"; ObjectID = "8Q8-57-xnT"; */
 "8Q8-57-xnT.title" = "Používať jemnú OSD stupnicu pre jas a kontrast";
 
-/* Class = "NSButtonCell"; title = "Start using MonitorControl"; ObjectID = "8WE-da-OZC"; */
-"8WE-da-OZC.title" = "Začať používať MonitorControl";
+/* Class = "NSButtonCell"; title = "Start using LumaControl"; ObjectID = "8WE-da-OZC"; */
+"8WE-da-OZC.title" = "Začať používať LumaControl";
 
 /* Class = "NSButtonCell"; title = "Special thanks to our contributors!"; ObjectID = "95V-M4-2l5"; */
 "95V-M4-2l5.title" = "Špeciálne poďakovanie patrí našim spolupracovníkom!";
@@ -137,8 +137,8 @@
 /* Class = "NSButtonCell"; title = "Use fine OSD scale for volume"; ObjectID = "J3L-MW-iJL"; */
 "J3L-MW-iJL.title" = "Použiť jemnú OSD stupnicu pre hlasitosť";
 
-/* Class = "NSButtonCell"; title = "Start MonitorControl at Login"; ObjectID = "JWJ-OY-VtE"; */
-"JWJ-OY-VtE.title" = "Spustiť MonitorControl pri štarte";
+/* Class = "NSButtonCell"; title = "Start LumaControl at Login"; ObjectID = "JWJ-OY-VtE"; */
+"JWJ-OY-VtE.title" = "Spustiť LumaControl pri štarte";
 
 /* Class = "NSTextFieldCell"; title = "Note: you can press Shift during startup for 'Safe mode' to restore defaults and avoid reading or setting anything."; ObjectID = "Jx2-gO-nq9"; */
 "Jx2-gO-nq9.title" = "Poznámka: Počas spúšťania môžete stlačiť klávesu Shift pre \"núdzový režim\" na obnovenie predvolených nastavení a zabráneniu čítania alebo nastavovania čohokoľvek.";
@@ -299,8 +299,8 @@
 /* Class = "NSButtonCell"; title = "Check for updates"; ObjectID = "jVH-oc-rUi"; */
 "jVH-oc-rUi.title" = "Skontrolovať aktualizácie";
 
-/* Class = "NSTextFieldCell"; title = "MonitorControl needs access to \"accessibility\" to use macOS native keys to control your display.\nYou can enable it by adding MonitorControl in System Settings > Security and Privacy > Accessibility."; ObjectID = "kBJ-Zf-1k2"; */
-"kBJ-Zf-1k2.title" = "MonitorControl potrebuje prístup k \"Prístupnosti\" pre ovládanie displeja natívne macOS klávesy.\nMôžete ho povoliť pridaním MonitorControl v Systémové nastavenia > Súkromie a bezpečnosť > Prístupnosť.";
+/* Class = "NSTextFieldCell"; title = "LumaControl needs access to \"accessibility\" to use macOS native keys to control your display.\nYou can enable it by adding LumaControl in System Settings > Security and Privacy > Accessibility."; ObjectID = "kBJ-Zf-1k2"; */
+"kBJ-Zf-1k2.title" = "LumaControl potrebuje prístup k \"Prístupnosti\" pre ovládanie displeja natívne macOS klávesy.\nMôžete ho povoliť pridaním LumaControl v Systémové nastavenia > Súkromie a bezpečnosť > Prístupnosť.";
 
 /* Class = "NSMenuItem"; title = "Depends on mouse pointer position"; ObjectID = "km4-hK-auM"; */
 "km4-hK-auM.title" = "Závisí od polohy ukazovateľa myši";
@@ -320,8 +320,8 @@
 /* Class = "NSButtonCell"; title = "Avoid gamma table manipulation"; ObjectID = "na6-mS-MPi"; */
 "na6-mS-MPi.title" = "Vyhnite sa manipulácii s gama tabuľkou";
 
-/* Class = "NSTextFieldCell"; title = "Ensure MonitorControl is always running when you need it by launching the app at startup."; ObjectID = "nk6-Gh-Mfs"; */
-"nk6-Gh-Mfs.title" = "Spustením aplikácie pri štarte zabezpečíte, aby bol MonitorControl vždy spustený, keď to potrebujete.";
+/* Class = "NSTextFieldCell"; title = "Ensure LumaControl is always running when you need it by launching the app at startup."; ObjectID = "nk6-Gh-Mfs"; */
+"nk6-Gh-Mfs.title" = "Spustením aplikácie pri štarte zabezpečíte, aby bol LumaControl vždy spustený, keď to potrebujete.";
 
 /* Class = "NSTextFieldCell"; title = "Brightness up"; ObjectID = "nty-g6-Sde"; */
 "nty-g6-Sde.title" = "Zvýšenie jasu";

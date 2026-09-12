@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ed25519 signing + Sparkle appcast generation for XDRMonitorControl.
+"""Ed25519 signing + Sparkle appcast generation for LumaControl.
 
 Self-contained on purpose: no third-party Python packages are needed, so this
 runs unchanged on a stock GitHub Actions macOS runner.
@@ -101,9 +101,9 @@ def sign(seed, message):
 APPCAST_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
-    <title>XDRMonitorControl</title>
-    <link>https://github.com/shay2000/XDRMonitorControl</link>
-    <description>Most recent release of XDRMonitorControl</description>
+    <title>LumaControl</title>
+    <link>https://github.com/shay2000/LumaControl</link>
+    <description>Most recent release of LumaControl</description>
     <language>en</language>
 {items}  </channel>
 </rss>

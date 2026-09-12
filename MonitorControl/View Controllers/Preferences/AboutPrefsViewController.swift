@@ -30,13 +30,7 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
   }
 
   @IBAction func openGitHubRepo(_: NSButton) {
-    if let url = URL(string: "https://github.com/shay2000/XDRMonitorControl") {
-      NSWorkspace.shared.open(url)
-    }
-  }
-
-  @IBAction func openOriginalRepo(_: NSButton) {
-    if let url = URL(string: "https://github.com/MonitorControl/MonitorControl") {
+    if let url = URL(string: "https://github.com/shay2000/LumaControl") {
       NSWorkspace.shared.open(url)
     }
   }

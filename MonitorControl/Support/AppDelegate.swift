@@ -336,7 +336,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     if self.sleepID == 0, self.reconfigureID == 0 {
       if !self.jobRunning {
-        os_log("MonitorControl job started.", type: .info)
+        os_log("LumaControl job started.", type: .info)
         self.jobRunning = true
       }
       var refreshedSomething = false
@@ -362,7 +362,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
     } else {
       self.jobRunning = false
-      os_log("MonitorControl job died because of sleep or reconfiguration.", type: .info)
+      os_log("LumaControl job died because of sleep or reconfiguration.", type: .info)
     }
   }
 
@@ -489,7 +489,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       self.safeMode = true
       let alert = NSAlert()
       alert.messageText = NSLocalizedString("Safe Mode Activated", comment: "Shown in the alert dialog")
-      alert.informativeText = NSLocalizedString("Shift was pressed during launch. MonitorControl started in safe mode. Default settings are reloaded, DDC read is blocked.", comment: "Shown in the alert dialog")
+      alert.informativeText = NSLocalizedString("Shift was pressed during launch. LumaControl started in safe mode. Default settings are reloaded, DDC read is blocked.", comment: "Shown in the alert dialog")
       alert.runModal()
     }
   }

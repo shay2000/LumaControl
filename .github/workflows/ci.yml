@@ -109,15 +109,15 @@ jobs:
 
       - name: Package DMG
         run: |
-          APP_PATH="$(pwd)/build/XDRMonitorControl.app"
+          APP_PATH="$(pwd)/build/LumaControl.app"
           VERSION="$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString)"
           STAGING=build/dmg-staging
           rm -rf "$STAGING"
           mkdir -p "$STAGING"
           cp -R "$APP_PATH" "$STAGING/"
           ln -s /Applications "$STAGING/Applications"
-          DMG_NAME="XDRMonitorControl-${VERSION}-universal.dmg"
-          hdiutil create -volname "XDRMonitorControl" -srcfolder "$STAGING" -ov -format UDZO "build/$DMG_NAME"
+          DMG_NAME="LumaControl-${VERSION}-universal.dmg"
+          hdiutil create -volname "LumaControl" -srcfolder "$STAGING" -ov -format UDZO "build/$DMG_NAME"
           hdiutil verify "build/$DMG_NAME"
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
           echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
@@ -138,11 +138,11 @@ jobs:
           files: build/${{ env.DMG_NAME }}
           generate_release_notes: true
           body: |
-            XDRMonitorControl ${{ env.APP_VERSION }} — universal (Apple Silicon + Intel) build.
+            LumaControl ${{ env.APP_VERSION }} — universal (Apple Silicon + Intel) build.
 
             The build is ad-hoc signed (no Apple Developer certificate). If macOS blocks it on first launch,
             right-click the app and choose "Open", or run:
-            `xattr -d com.apple.quarantine /Applications/XDRMonitorControl.app`
+            `xattr -d com.apple.quarantine /Applications/LumaControl.app`
 
       # Rebuild the Sparkle feed so installed copies can actually see this release.
       - name: Generate signed appcast
@@ -155,7 +155,7 @@ jobs:
             echo "::error::SPARKLE_PRIVATE_KEY secret is missing. Add it under Settings > Secrets and variables > Actions - the app rejects updates that are not signed."
             exit 1
           fi
-          BUILD="$(defaults read "$(pwd)/build/XDRMonitorControl.app/Contents/Info.plist" CFBundleVersion)"
+          BUILD="$(defaults read "$(pwd)/build/LumaControl.app/Contents/Info.plist" CFBundleVersion)"
           URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${DMG_NAME}"
           python3 build/sparkle_sign.py appcast \
             --dmg "build/${DMG_NAME}" \
@@ -186,5 +186,5 @@ jobs:
           fi
           cp /tmp/new-appcast.xml appcast.xml
           git add appcast.xml
-          git commit -m "appcast: XDRMonitorControl ${APP_VERSION} (build ${APP_BUILD}) [skip ci]" || echo "appcast unchanged"
+          git commit -m "appcast: LumaControl ${APP_VERSION} (build ${APP_BUILD}) [skip ci]" || echo "appcast unchanged"
           git push origin main

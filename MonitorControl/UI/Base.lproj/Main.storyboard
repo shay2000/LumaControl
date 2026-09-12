@@ -1962,22 +1962,10 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button verticalHuggingPriority="750" id="Dqc-RQ-Lbc">
-                                <rect key="frame" x="249" y="70" width="420" height="20"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="bevel" title="Original repo: github.com/MonitorControl/MonitorControl" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="e0q-fb-k7R">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <color key="contentTintColor" name="linkColor" catalog="System" colorSpace="catalog"/>
-                                <connections>
-                                    <action selector="openOriginalRepo:" target="7uI-eE-yxm" id="ori-repo-001"/>
-                                </connections>
-                            </button>
                             <textField identifier="softwareNameLabel" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="dtg-g7-hZb">
                                 <rect key="frame" x="249" y="286" width="420" height="26"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="XDRMonitorControl" id="1PJ-14-Bvn">
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="LumaControl" id="1PJ-14-Bvn">
                                     <font key="font" textStyle="title1" name=".SFNS-Regular"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1986,7 +1974,7 @@
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xdr-subtitle">
                                 <rect key="frame" x="249" y="262" width="420" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="A fork of MonitorControl with XDR extended brightness support" id="xdr-subtitle-cell">
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Modern display control for macOS" id="xdr-subtitle-cell">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2019,7 +2007,7 @@
                             <button verticalHuggingPriority="750" id="W2f-KE-6PO">
                                 <rect key="frame" x="249" y="196" width="420" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="bevel" title="github.com/shay2000/XDRMonitorControl" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="42n-Zy-AqF">
+                                <buttonCell key="cell" type="bevel" title="github.com/shay2000/LumaControl" bezelStyle="rounded" alignment="left" imageScaling="proportionallyDown" inset="2" id="42n-Zy-AqF">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                     <attributedString key="userComments">
@@ -2085,7 +2073,7 @@
                             </imageView>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zz2-ed-nlQ">
                                 <rect key="frame" x="22" y="439" width="686" height="31"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Welcome to MonitorControl" id="5J0-BD-top">
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Welcome to LumaControl" id="5J0-BD-top">
                                     <font key="font" textStyle="largeTitle" name=".SFNS-Regular"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2119,7 +2107,7 @@
                             </textField>
                             <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="2Mx-eg-r9b">
                                 <rect key="frame" x="70" y="330" width="550" height="16"/>
-                                <textFieldCell key="cell" selectable="YES" title="Ensure MonitorControl is always running when you need it by launching the app at startup." id="nk6-Gh-Mfs">
+                                <textFieldCell key="cell" selectable="YES" title="Ensure LumaControl is always running when you need it by launching the app at startup." id="nk6-Gh-Mfs">
                                     <font key="font" textStyle="body" name=".SFNS-Regular"/>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2127,7 +2115,7 @@
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XWw-qf-xqA">
                                 <rect key="frame" x="70" y="303" width="203" height="18"/>
-                                <buttonCell key="cell" type="check" title="Start MonitorControl at Login" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="JWJ-OY-VtE">
+                                <buttonCell key="cell" type="check" title="Start LumaControl at Login" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="JWJ-OY-VtE">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" textStyle="body" name=".SFNS-Regular"/>
                                 </buttonCell>
@@ -2203,8 +2191,8 @@
                                 <rect key="frame" x="70" y="111" width="615" height="32"/>
                                 <textFieldCell key="cell" selectable="YES" id="kBJ-Zf-1k2">
                                     <font key="font" textStyle="body" name=".SFNS-Regular"/>
-                                    <string key="title">MonitorControl needs access to "accessibility" to use macOS native keys to control your display.
-You can enable it by adding MonitorControl in System Settings &gt; Security and Privacy &gt; Accessibility.</string>
+                                    <string key="title">LumaControl needs access to "accessibility" to use macOS native keys to control your display.
+You can enable it by adding LumaControl in System Settings &gt; Security and Privacy &gt; Accessibility.</string>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -2221,7 +2209,7 @@ You can enable it by adding MonitorControl in System Settings &gt; Security and 
                             </button>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BWF-bm-wMQ">
                                 <rect key="frame" x="518" y="17" width="195" height="32"/>
-                                <buttonCell key="cell" type="push" title="Start using MonitorControl" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="8WE-da-OZC">
+                                <buttonCell key="cell" type="push" title="Start using LumaControl" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="8WE-da-OZC">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                     <string key="keyEquivalent" base64-UTF8="YES">

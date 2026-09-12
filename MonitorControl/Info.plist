@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>LumaControl</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconFile</key>
@@ -19,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>34</string>
+	<string>38</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
@@ -27,11 +29,11 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>MIT Licensed. Fork by @shay2000. Original © MonitorControl contributors.</string>
+	<string>MIT Licensed. LumaControl changes © 2026 Shay Prasad. Original © MonitorControl contributors.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/shay2000/XDRMonitorControl/main/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/shay2000/LumaControl/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>EBCupt3NyRAmsMebInCuD0Cu1D2Rjx3PJkoTuyNtL1k=</string>
 </dict>

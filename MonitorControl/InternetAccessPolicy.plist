@@ -5,25 +5,11 @@
 	<key>ApplicationDescription</key>
 	<string>ApplicationDescription</string>
 	<key>DeveloperName</key>
-	<string>MonitorControl</string>
+	<string>LumaControl</string>
 	<key>Website</key>
-	<string>https://monitorcontrol.app</string>
+	<string>https://github.com/shay2000/LumaControl</string>
 	<key>Connections</key>
 	<array>
-		<dict>
-			<key>IsIncoming</key>
-			<false/>
-			<key>Host</key>
-			<string>monitorcontrol.app</string>
-			<key>NetworkProtocol</key>
-			<string>TCP</string>
-			<key>Port</key>
-			<string>443</string>
-			<key>Purpose</key>
-			<string>SoftwareUpdatePurpose</string>
-			<key>DenyConsequences</key>
-			<string>SoftwareUpdateDenyConsequences</string>
-		</dict>
 		<dict>
 			<key>IsIncoming</key>
 			<false/>

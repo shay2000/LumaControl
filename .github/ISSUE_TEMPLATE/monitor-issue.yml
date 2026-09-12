@@ -1,5 +1,5 @@
 name: Monitor Issue
-description: MonitorControl is not working as expected on my monitor.
+description: LumaControl is not working as expected on my monitor.
 labels: ["Monitor Issue"]
 assignees: []
 body:
@@ -10,9 +10,7 @@ body:
       options:
         - label: Searched for existing issues
           required: true
-        - label: Read through [the Monitor-Troubleshooting Wiki](https://github.com/MonitorControl/MonitorControl/wiki/Monitor-Troubleshooting)
-          required: true
-        - label: Updated MonitorControl to the latest version (if applicable)
+        - label: Updated LumaControl to the latest version (if applicable)
           required: true
   - type: textarea
     validations:
@@ -45,7 +43,7 @@ body:
         examples:
             - **macOS version**: 11.4 Big Sur
             - **Mac model**: MacBook Pro (16-inch, 2019)
-            - **MonitorControl version**: v2.1.0
+            - **LumaControl version**: v0.3.0
             - **Monitor(s)**: LG 38GN950, LG 27UN83A
             - **Monitor Cable(s)/Connection(s)**:  
             &nbsp;&nbsp;- Mac Mini -> DisplayPort 2.1 -> LG 38GN950
@@ -54,7 +52,7 @@ body:
       value: |
         - macOS version:
         - Mac model:
-        - MonitorControl version:
+        - LumaControl version:
         - Monitor(s):
         - Monitor Cable(s)/Connection(s):
         - Apple Silicon/M1 (yes or no):

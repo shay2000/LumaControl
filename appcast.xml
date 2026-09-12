@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
-    <title>XDRMonitorControl</title>
-    <link>https://github.com/shay2000/XDRMonitorControl</link>
-    <description>Most recent release of XDRMonitorControl</description>
+    <title>LumaControl</title>
+    <link>https://github.com/shay2000/LumaControl</link>
+    <description>Most recent release of LumaControl</description>
     <language>en</language>
     <item>
       <title>Version 0.2.0</title>
       <pubDate>Sat, 12 Sep 2026 01:02:27 +0000</pubDate>
       <sparkle:version>33</sparkle:version>
       <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
-      <enclosure url="https://github.com/shay2000/XDRMonitorControl/releases/download/v0.2.0/XDRMonitorControl-0.2.0-universal.dmg" length="6182768" type="application/x-apple-diskimage"
+      <enclosure url="https://github.com/shay2000/LumaControl/releases/download/v0.2.0/XDRMonitorControl-0.2.0-universal.dmg" length="6182768" type="application/x-apple-diskimage"
               sparkle:edSignature="s+miFokxXgSuIZ+yfC7mCwoUqNdI58rGytcqdmwh2O8ax0wgzQNHwYCJteMDWco4oVZ+ZjhGTchxSvZF0GyhDw=="/>
     </item>
   </channel>

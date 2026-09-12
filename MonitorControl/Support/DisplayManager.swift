@@ -15,7 +15,7 @@ class DisplayManager {
   var gammaInterferenceWarningShown = false
 
   func createGammaActivityEnforcer() {
-    self.gammaActivityEnforcer.title = "Monitor Control Gamma Activity Enforcer"
+    self.gammaActivityEnforcer.title = "LumaControl Gamma Activity Enforcer"
     self.gammaActivityEnforcer.isMovableByWindowBackground = false
     self.gammaActivityEnforcer.backgroundColor = DEBUG_GAMMA_ENFORCER ? .red : .black
     self.gammaActivityEnforcer.alphaValue = 1 * (DEBUG_GAMMA_ENFORCER ? 0.5 : 0.01)
@@ -65,7 +65,7 @@ class DisplayManager {
   func createShadeOnDisplay(displayID: CGDirectDisplayID) -> NSWindow? {
     if let screen = DisplayManager.getByDisplayID(displayID: displayID) {
       let shade = NSWindow(contentRect: .init(origin: NSPoint(x: 0, y: 0), size: .init(width: 10, height: 1)), styleMask: [], backing: .buffered, defer: false)
-      shade.title = "Monitor Control Window Shade for Display " + String(displayID)
+      shade.title = "LumaControl Window Shade for Display " + String(displayID)
       shade.isMovableByWindowBackground = false
       shade.backgroundColor = .clear
       shade.ignoresMouseEvents = true
