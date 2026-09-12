@@ -71,6 +71,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationDidFinishLaunching(_: Notification) {
     app = self
+    // The unit-test bundle is injected into the app, so the app delegate runs during
+    // `xcodebuild test`. Bail out before anything touches the UI: onboarding, the
+    // accessibility prompt and the "incompatible previous version" alert are all modal
+    // and hang the test runner forever on a headless CI machine. The suite only covers
+    // display/brightness logic, which needs none of this setup.
+    if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+      || ProcessInfo.processInfo.environment["XCInjectBundleInto"] != nil {
+      return
+    }
     self.subscribeEventListeners()
     self.showSafeModeAlertIfNeeded()
     if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {

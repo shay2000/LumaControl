@@ -78,7 +78,9 @@ final class XDRBrightnessTests: XCTestCase {
 
   func testCalcNewBrightnessClampsAtXDRMax() {
     self.stubbedDisplay.savePref(true, key: .xdrEnabled)
-    self.stubbedDisplay.stubbedBrightness = 1.48
+    // Park it one chiclet below the ceiling: the next step would overshoot, so the
+    // result has to be clamped to the XDR maximum rather than landing past it.
+    self.stubbedDisplay.stubbedBrightness = self.stubbedDisplay.xdrMaxValue - (1 / 16.0)
     XCTAssertEqual(self.stubbedDisplay.calcNewBrightness(isUp: true, isSmallIncrement: false), self.stubbedDisplay.xdrMaxValue)
   }
 

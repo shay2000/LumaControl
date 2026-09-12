@@ -18,7 +18,12 @@ jobs:
   test:
     name: Build and test
     runs-on: macos-15
-    timeout-minutes: 60
+    # Generous for a cold SwiftPM build, but short enough that a hang surfaces as a
+    # failure instead of silently eating an hour and blocking every release.
+    timeout-minutes: 30
+    # The appcast commits pushed by the dmg job below carry [skip ci]; honour it so
+    # publishing a release does not kick off another full build.
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     steps:
       # actions/checkout v4.2.2
       - name: Checkout
@@ -76,6 +81,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 90
     needs: test
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     permissions:
       contents: write # required to publish the release on tags
     steps:
