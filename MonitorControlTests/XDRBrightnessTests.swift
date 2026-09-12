@@ -2,7 +2,7 @@
 
 import XCTest
 
-@testable import XDRMonitorControl
+@testable import LumaControl
 
 // AppleDisplay.getBrightness() short-circuits to a constant for dummy displays, so
 // calcNewBrightness tests use this stub to drive the current brightness directly.
