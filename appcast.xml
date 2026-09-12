@@ -6,12 +6,12 @@
     <description>Most recent release of LumaControl</description>
     <language>en</language>
     <item>
-      <title>Version 0.3.0</title>
-      <pubDate>Sat, 12 Sep 2026 11:25:22 +0000</pubDate>
-      <sparkle:version>39</sparkle:version>
-      <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
-      <enclosure url="https://github.com/shay2000/LumaControl/releases/download/v0.3.0/LumaControl-0.3.0-universal.dmg" length="6232483" type="application/x-apple-diskimage"
-              sparkle:edSignature="iuSzHWN9GUPPdvOhmaxiCUcXJb31ftKPygwdMM9WZjrB4EMoQTx9+gB8JhkVM+sUU0LDmDGbvYJLCyH1ULIsDA=="/>
+      <title>Version 1.0.0</title>
+      <pubDate>Sat, 12 Sep 2026 13:06:09 +0000</pubDate>
+      <sparkle:version>46</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <enclosure url="https://github.com/shay2000/LumaControl/releases/download/v1.0.0/LumaControl-1.0.0-universal.dmg" length="6220874" type="application/x-apple-diskimage"
+              sparkle:edSignature="yhl/ZtA6+N/6H/ChgQxi1a+xPxze2Pd6EkOKLhbgSNgi7uSsstZEqtmuzu4WkXRuxrg22YcJP+z3CG1qYSTXBQ=="/>
     </item>
   </channel>
 </rss>
