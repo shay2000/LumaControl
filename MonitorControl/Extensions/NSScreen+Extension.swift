@@ -43,10 +43,11 @@ public extension NSScreen {
     }
 
     defer {
-      assert(IOObjectRelease(servicePortIterator) == KERN_SUCCESS)
+      _ = IOObjectRelease(servicePortIterator)
     }
 
     while case let object = IOIteratorNext(servicePortIterator), object != 0 {
+      defer { _ = IOObjectRelease(object) }
       let dict = (IODisplayCreateInfoDictionary(object, UInt32(kIODisplayOnlyPreferredName)).takeRetainedValue() as NSDictionary as? [String: AnyObject])!
 
       if dict[kDisplayVendorID] as? UInt32 == self.vendorNumber, dict[kDisplayProductID] as? UInt32 == self.modelNumber, dict[kDisplaySerialNumber] as? UInt32 == self.serialNumber {

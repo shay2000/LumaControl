@@ -42,7 +42,6 @@ class DisplayManager {
   }
 
   var shades: [CGDirectDisplayID: NSWindow] = [:]
-  var shadeGrave: [NSWindow] = []
 
   func isDisqualifiedFromShade(_ displayID: CGDirectDisplayID) -> Bool {
     if CGDisplayIsInHWMirrorSet(displayID) != 0 || CGDisplayIsInMirrorSet(displayID) != 0 {
@@ -65,6 +64,7 @@ class DisplayManager {
   func createShadeOnDisplay(displayID: CGDirectDisplayID) -> NSWindow? {
     if let screen = DisplayManager.getByDisplayID(displayID: displayID) {
       let shade = NSWindow(contentRect: .init(origin: NSPoint(x: 0, y: 0), size: .init(width: 10, height: 1)), styleMask: [], backing: .buffered, defer: false)
+      shade.isReleasedWhenClosed = false
       shade.title = "LumaControl Window Shade for Display " + String(displayID)
       shade.isMovableByWindowBackground = false
       shade.backgroundColor = .clear
@@ -117,7 +117,6 @@ class DisplayManager {
   func destroyShade(displayID: CGDirectDisplayID) -> Bool {
     if let shade = shades[displayID] {
       os_log("Destroying shade for display %{public}@", type: .info, String(displayID))
-      self.shadeGrave.append(shade)
       self.shades.removeValue(forKey: displayID)
       shade.close()
       return true

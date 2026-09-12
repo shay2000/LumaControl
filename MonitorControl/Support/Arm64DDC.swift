@@ -163,23 +163,25 @@ class Arm64DDC: NSObject {
     return matchScore
   }
 
-  static func ioregIterateToNextObjectOfInterest(interests: [String], iterator: inout io_iterator_t) -> (name: String, entry: io_service_t, preceedingEntry: io_service_t)? {
-    var entry: io_service_t = IO_OBJECT_NULL
-    var preceedingEntry: io_service_t = IO_OBJECT_NULL
+  static func ioregIterateToNextObjectOfInterest(interests: [String], iterator: inout io_iterator_t) -> (name: String, entry: io_service_t)? {
     let name = UnsafeMutablePointer<CChar>.allocate(capacity: MemoryLayout<io_name_t>.size)
     defer {
       name.deallocate()
     }
     while true {
-      preceedingEntry = entry
-      entry = IOIteratorNext(iterator)
-      guard IORegistryEntryGetName(entry, name) == KERN_SUCCESS, entry != MACH_PORT_NULL else {
+      let entry = IOIteratorNext(iterator)
+      guard entry != IO_OBJECT_NULL else {
+        break
+      }
+      guard IORegistryEntryGetName(entry, name) == KERN_SUCCESS else {
+        _ = IOObjectRelease(entry)
         break
       }
       let nameString = String(cString: name)
       for interest in interests where entry != IO_OBJECT_NULL && nameString.contains(interest) {
-        return (nameString, entry, preceedingEntry)
+        return (nameString, entry)
       }
+      _ = IOObjectRelease(entry)
     }
     return nil
   }
@@ -190,8 +192,10 @@ class Arm64DDC: NSObject {
       ioregService.edidUUID = edidUUID
     }
     let cpath = UnsafeMutablePointer<CChar>.allocate(capacity: MemoryLayout<io_string_t>.size)
-    IORegistryEntryGetPath(entry, kIOServicePlane, cpath)
-    ioregService.ioDisplayLocation = String(cString: cpath)
+    defer { cpath.deallocate() }
+    if IORegistryEntryGetPath(entry, kIOServicePlane, cpath) == KERN_SUCCESS {
+      ioregService.ioDisplayLocation = String(cString: cpath)
+    }
     if let unmanagedDisplayAttrs = IORegistryEntryCreateCFProperty(entry, "DisplayAttributes" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let displayAttrs = unmanagedDisplayAttrs.takeRetainedValue() as? NSDictionary {
       ioregService.displayAttributes = displayAttrs
       if let productAttrs = displayAttrs.value(forKey: "ProductAttributes") as? NSDictionary {
@@ -250,6 +254,7 @@ class Arm64DDC: NSObject {
       guard let objectOfInterest = ioregIterateToNextObjectOfInterest(interests: [keyDCPAVServiceProxy] + keysFramebuffer, iterator: &iterator) else {
         break
       }
+      defer { _ = IOObjectRelease(objectOfInterest.entry) }
       if keysFramebuffer.contains(objectOfInterest.name) {
         ioregService = self.getIORegServiceAppleCDC2Properties(entry: objectOfInterest.entry)
         serviceLocation += 1

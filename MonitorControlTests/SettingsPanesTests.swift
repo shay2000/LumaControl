@@ -27,6 +27,23 @@ import XCTest
 // These tests load the same scenes the same way `main.swift` does, so they fail loudly the
 // moment the two names drift apart again. They need no display and touch no hardware.
 final class SettingsPanesTests: XCTestCase {
+  func testDestroyedShadeDoesNotRetainClosedWindow() {
+    let displayID = CGDirectDisplayID.max
+    weak var weakShade: NSWindow?
+
+    autoreleasepool {
+      let shade = NSWindow(contentRect: .zero, styleMask: [], backing: .buffered, defer: true)
+      shade.isReleasedWhenClosed = false
+      weakShade = shade
+      DisplayManager.shared.shades[displayID] = shade
+
+      XCTAssertTrue(DisplayManager.shared.destroyShade(displayID: displayID))
+      XCTAssertNil(DisplayManager.shared.shades[displayID])
+    }
+
+    XCTAssertNil(weakShade, "Destroying a shade must release the closed window after removing it from the manager.")
+  }
+
   func testEverySettingsPaneLoadsFromTheStoryboard() {
     let storyboard = NSStoryboard(name: "Main", bundle: Bundle.main)
 

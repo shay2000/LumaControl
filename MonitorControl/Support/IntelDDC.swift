@@ -11,8 +11,12 @@ public class IntelDDC {
   let replyTransactionType: IOOptionBits
   var enabled: Bool = false
 
+  static func decodeDDCWord(high: UInt8, low: UInt8) -> UInt16 {
+    (UInt16(high) << 8) | UInt16(low)
+  }
+
   deinit {
-    assert(IOObjectRelease(self.framebuffer) == KERN_SUCCESS)
+    _ = IOObjectRelease(self.framebuffer)
   }
 
   public init?(for displayId: CGDirectDisplayID, withReplyTransactionType replyTransactionType: IOOptionBits? = nil) {
@@ -27,6 +31,7 @@ public class IntelDDC {
       self.replyTransactionType = replyTransactionType
     } else {
       os_log("No supported reply transaction type found for display with ID %u.", type: .error, displayId)
+      _ = IOObjectRelease(framebuffer)
       return nil
     }
   }
@@ -42,18 +47,23 @@ public class IntelDDC {
     data[4] = UInt8(value >> 8)
     data[5] = UInt8(value & 255)
     data[6] = 0x6E ^ data[0] ^ data[1] ^ data[2] ^ data[3] ^ data[4] ^ data[5]
+    let dataCount = UInt32(data.count)
 
     for _ in 1 ... numofWriteCycles {
       usleep(writeSleepTime)
-      var request = IOI2CRequest()
-      request.commFlags = 0
-      request.sendAddress = 0x6E
-      request.sendTransactionType = IOOptionBits(kIOI2CSimpleTransactionType)
-      request.sendBuffer = withUnsafePointer(to: &data[0]) { vm_address_t(bitPattern: $0) }
-      request.sendBytes = UInt32(data.count)
-      request.replyTransactionType = IOOptionBits(kIOI2CNoTransactionType)
-      request.replyBytes = 0
-      if IntelDDC.send(request: &request, to: self.framebuffer, errorRecoveryWaitTime: errorRecoveryWaitTime) {
+      let sent = data.withUnsafeMutableBytes { sendBuffer -> Bool in
+        guard let sendBaseAddress = sendBuffer.baseAddress else { return false }
+        var request = IOI2CRequest()
+        request.commFlags = 0
+        request.sendAddress = 0x6E
+        request.sendTransactionType = IOOptionBits(kIOI2CSimpleTransactionType)
+        request.sendBuffer = vm_address_t(bitPattern: sendBaseAddress)
+        request.sendBytes = dataCount
+        request.replyTransactionType = IOOptionBits(kIOI2CNoTransactionType)
+        request.replyBytes = 0
+        return IntelDDC.send(request: &request, to: self.framebuffer, errorRecoveryWaitTime: errorRecoveryWaitTime)
+      }
+      if sent {
         success = true
       }
     }
@@ -69,24 +79,32 @@ public class IntelDDC {
     data[2] = 0x01
     data[3] = command
     data[4] = 0x6E ^ data[0] ^ data[1] ^ data[2] ^ data[3]
+    let dataCount = UInt32(data.count)
+    let replyDataCount = UInt32(replyData.count)
 
     for i in 1 ... tries {
       usleep(writeSleepTime)
       usleep(errorRecoveryWaitTime ?? 0)
-      var request = IOI2CRequest()
-      request.commFlags = 0
-      request.sendAddress = 0x6E
-      request.sendTransactionType = IOOptionBits(kIOI2CSimpleTransactionType)
-      request.sendBuffer = withUnsafePointer(to: &data[0]) { vm_address_t(bitPattern: $0) }
-      request.sendBytes = UInt32(data.count)
-      request.minReplyDelay = minReplyDelay ?? 10
-      request.replyAddress = 0x6F
-      request.replySubAddress = 0x51
-      request.replyTransactionType = self.replyTransactionType
-      request.replyBytes = UInt32(replyData.count)
-      request.replyBuffer = withUnsafePointer(to: &replyData[0]) { vm_address_t(bitPattern: $0) }
+      let sent = data.withUnsafeMutableBytes { sendBuffer -> Bool in
+        replyData.withUnsafeMutableBytes { replyBuffer -> Bool in
+          guard let sendBaseAddress = sendBuffer.baseAddress, let replyBaseAddress = replyBuffer.baseAddress else { return false }
+          var request = IOI2CRequest()
+          request.commFlags = 0
+          request.sendAddress = 0x6E
+          request.sendTransactionType = IOOptionBits(kIOI2CSimpleTransactionType)
+          request.sendBuffer = vm_address_t(bitPattern: sendBaseAddress)
+          request.sendBytes = dataCount
+          request.minReplyDelay = minReplyDelay ?? 10
+          request.replyAddress = 0x6F
+          request.replySubAddress = 0x51
+          request.replyTransactionType = self.replyTransactionType
+          request.replyBytes = replyDataCount
+          request.replyBuffer = vm_address_t(bitPattern: replyBaseAddress)
+          return IntelDDC.send(request: &request, to: self.framebuffer, errorRecoveryWaitTime: errorRecoveryWaitTime)
+        }
+      }
 
-      if IntelDDC.send(request: &request, to: self.framebuffer, errorRecoveryWaitTime: errorRecoveryWaitTime) {
+      if sent {
         if replyData.count > 0 {
           let checksum = replyData.last!
           var calculated = UInt8(0x50)
@@ -112,8 +130,8 @@ public class IntelDDC {
           os_log("Reading %{public}@ took %u tries.", type: .info, String(reflecting: command), i)
         }
         let (mh, ml, sh, sl) = (replyData[6], replyData[7], replyData[8], replyData[9])
-        let maxValue = UInt16(mh << 8) + UInt16(ml)
-        let currentValue = UInt16(sh << 8) + UInt16(sl)
+        let maxValue = Self.decodeDDCWord(high: mh, low: ml)
+        let currentValue = Self.decodeDDCWord(high: sh, low: sl)
         return (currentValue, maxValue)
       }
     }
@@ -126,9 +144,10 @@ public class IntelDDC {
       return nil
     }
     defer {
-      assert(IOObjectRelease(ioIterator) == KERN_SUCCESS)
+      _ = IOObjectRelease(ioIterator)
     }
     while case let ioService = IOIteratorNext(ioIterator), ioService != 0 {
+      defer { _ = IOObjectRelease(ioService) }
       var serviceProperties: Unmanaged<CFMutableDictionary>?
       guard IORegistryEntryCreateCFProperties(ioService, &serviceProperties, kCFAllocatorDefault, IOOptionBits()) == KERN_SUCCESS, serviceProperties != nil else {
         continue
@@ -164,6 +183,7 @@ public class IntelDDC {
         continue
       }
       var connect: IOI2CConnectRef?
+      defer { _ = IOObjectRelease(interface) }
       guard IOI2CInterfaceOpen(interface, IOOptionBits(), &connect) == KERN_SUCCESS else {
         os_log("Failed to connect to interface %u for framebuffer with ID %u.", type: .error, bus, framebuffer)
         continue
@@ -190,9 +210,13 @@ public class IntelDDC {
       return nil
     }
     defer {
-      assert(IOObjectRelease(portIterator) == KERN_SUCCESS)
+      _ = IOObjectRelease(portIterator)
     }
     while case let port = IOIteratorNext(portIterator), port != 0 {
+      var transfersPortOwnership = false
+      defer {
+        if !transfersPortOwnership { _ = IOObjectRelease(port) }
+      }
       let dict = IODisplayCreateInfoDictionary(port, IOOptionBits(kIODisplayOnlyPreferredName)).takeRetainedValue() as NSDictionary
       let valueForKey = { (k: String) in
         (dict[k] as? CFIndex).flatMap { Int32(exactly: $0) }.flatMap { UInt32(bitPattern: $0) } ?? 0
@@ -231,6 +255,7 @@ public class IntelDDC {
       os_log("Vendor ID: %u, Product ID: %u, Serial Number: %u", type: .info, portVendorId, portProductId, portSerialNumber)
       os_log("Unit Number: %u", type: .info, CGDisplayUnitNumber(displayId))
       os_log("Service Port: %u", type: .info, port)
+      transfersPortOwnership = true
       return port
     }
     os_log("No service port found for display with ID %u.", type: .error, displayId)
@@ -253,6 +278,7 @@ public class IntelDDC {
     var busCount: IOItemCount = 0
     guard IOFBGetI2CInterfaceCount(servicePort, &busCount) == KERN_SUCCESS, busCount >= 1 else {
       os_log("No framebuffer port found for display with ID %u.", type: .error, displayId)
+      _ = IOObjectRelease(servicePort)
       return nil
     }
     return servicePort

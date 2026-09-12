@@ -61,6 +61,7 @@
 		FE4E0896249D584C003A50BB /* OSDUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4E0895249D584C003A50BB /* OSDUtils.swift */; };
 		E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */; };
 		E77C0DE000000000000000B3 /* SettingsPanesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000B1 /* SettingsPanesTests.swift */; };
+		E77C0DE000000000000000C3 /* IntelDDCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77C0DE000000000000000C1 /* IntelDDCTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -187,6 +188,7 @@
 		FE4E0895249D584C003A50BB /* OSDUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSDUtils.swift; sourceTree = "<group>"; };
 		E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XDRBrightnessTests.swift; sourceTree = "<group>"; };
 		E77C0DE000000000000000B1 /* SettingsPanesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPanesTests.swift; sourceTree = "<group>"; };
+		E77C0DE000000000000000C1 /* IntelDDCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelDDCTests.swift; sourceTree = "<group>"; };
 		E77C0DE000000000000000A2 /* MonitorControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MonitorControlTests.xctest; path = MonitorControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -393,6 +395,7 @@
 			children = (
 				E77C0DE000000000000000A1 /* XDRBrightnessTests.swift */,
 				E77C0DE000000000000000B1 /* SettingsPanesTests.swift */,
+				E77C0DE000000000000000C1 /* IntelDDCTests.swift */,
 			);
 			path = MonitorControlTests;
 			sourceTree = "<group>";
@@ -749,6 +752,7 @@
 			files = (
 				E77C0DE000000000000000A3 /* XDRBrightnessTests.swift in Sources */,
 				E77C0DE000000000000000B3 /* SettingsPanesTests.swift in Sources */,
+				E77C0DE000000000000000C3 /* IntelDDCTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
