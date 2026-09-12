@@ -180,7 +180,6 @@ class Display: Equatable {
       _ = self.setDirectBrightness(self.smoothBrightnessTransient, transient: true)
       self.smoothBrightnessRunning = false
     }
-    self.swBrightnessSemaphore.signal()
     return true
   }
 
@@ -243,7 +242,6 @@ class Display: Equatable {
       DispatchQueue.global(qos: .userInteractive).async {
         for transientValue in stride(from: currentValue, to: newValue, by: 0.005 * (currentValue > newValue ? -1 : 1)) {
           guard app.reconfigureID == 0 else {
-            self.swBrightnessSemaphore.signal()
             return
           }
           if self.isVirtual || self.readPrefAsBool(key: .avoidGamma) {

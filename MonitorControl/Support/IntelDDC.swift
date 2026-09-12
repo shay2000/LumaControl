@@ -12,7 +12,7 @@ public class IntelDDC {
   var enabled: Bool = false
 
   deinit {
-    assert(IOObjectRelease(self.framebuffer) == KERN_SUCCESS)
+    _ = IOObjectRelease(self.framebuffer)
   }
 
   public init?(for displayId: CGDirectDisplayID, withReplyTransactionType replyTransactionType: IOOptionBits? = nil) {
@@ -27,6 +27,7 @@ public class IntelDDC {
       self.replyTransactionType = replyTransactionType
     } else {
       os_log("No supported reply transaction type found for display with ID %u.", type: .error, displayId)
+      _ = IOObjectRelease(framebuffer)
       return nil
     }
   }
@@ -126,9 +127,10 @@ public class IntelDDC {
       return nil
     }
     defer {
-      assert(IOObjectRelease(ioIterator) == KERN_SUCCESS)
+      _ = IOObjectRelease(ioIterator)
     }
     while case let ioService = IOIteratorNext(ioIterator), ioService != 0 {
+      defer { _ = IOObjectRelease(ioService) }
       var serviceProperties: Unmanaged<CFMutableDictionary>?
       guard IORegistryEntryCreateCFProperties(ioService, &serviceProperties, kCFAllocatorDefault, IOOptionBits()) == KERN_SUCCESS, serviceProperties != nil else {
         continue
@@ -164,6 +166,7 @@ public class IntelDDC {
         continue
       }
       var connect: IOI2CConnectRef?
+      defer { _ = IOObjectRelease(interface) }
       guard IOI2CInterfaceOpen(interface, IOOptionBits(), &connect) == KERN_SUCCESS else {
         os_log("Failed to connect to interface %u for framebuffer with ID %u.", type: .error, bus, framebuffer)
         continue
@@ -190,9 +193,13 @@ public class IntelDDC {
       return nil
     }
     defer {
-      assert(IOObjectRelease(portIterator) == KERN_SUCCESS)
+      _ = IOObjectRelease(portIterator)
     }
     while case let port = IOIteratorNext(portIterator), port != 0 {
+      var transfersPortOwnership = false
+      defer {
+        if !transfersPortOwnership { _ = IOObjectRelease(port) }
+      }
       let dict = IODisplayCreateInfoDictionary(port, IOOptionBits(kIODisplayOnlyPreferredName)).takeRetainedValue() as NSDictionary
       let valueForKey = { (k: String) in
         (dict[k] as? CFIndex).flatMap { Int32(exactly: $0) }.flatMap { UInt32(bitPattern: $0) } ?? 0
@@ -231,6 +238,7 @@ public class IntelDDC {
       os_log("Vendor ID: %u, Product ID: %u, Serial Number: %u", type: .info, portVendorId, portProductId, portSerialNumber)
       os_log("Unit Number: %u", type: .info, CGDisplayUnitNumber(displayId))
       os_log("Service Port: %u", type: .info, port)
+      transfersPortOwnership = true
       return port
     }
     os_log("No service port found for display with ID %u.", type: .error, displayId)
@@ -253,6 +261,7 @@ public class IntelDDC {
     var busCount: IOItemCount = 0
     guard IOFBGetI2CInterfaceCount(servicePort, &busCount) == KERN_SUCCESS, busCount >= 1 else {
       os_log("No framebuffer port found for display with ID %u.", type: .error, displayId)
+      _ = IOObjectRelease(servicePort)
       return nil
     }
     return servicePort

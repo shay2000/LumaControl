@@ -36,6 +36,7 @@ final class XDRBrightnessTests: XCTestCase {
       display?.removePref(key: .xdrMaxBrightness)
       display?.removePref(key: .xdrWarningAcknowledged)
       display?.removePref(key: .value, for: .brightness)
+      display?.removePref(key: .SwBrightness)
     }
     self.appleDisplay = nil
     self.stubbedDisplay = nil
@@ -118,5 +119,16 @@ final class XDRBrightnessTests: XCTestCase {
     let transformed = self.appleDisplay.swBrightnessTransform(value: value)
     let roundTrip = self.appleDisplay.swBrightnessTransform(value: transformed, reverse: true)
     XCTAssertEqual(roundTrip, value, accuracy: 0.0001)
+  }
+
+  func testSmoothBrightnessDoesNotAddSemaphorePermits() {
+    self.otherDisplay.smoothBrightnessTransient = 0.5
+    self.otherDisplay.savePref(Float(0.5), for: .brightness)
+
+    XCTAssertTrue(self.otherDisplay.setSmoothBrightness())
+
+    XCTAssertEqual(self.otherDisplay.swBrightnessSemaphore.wait(timeout: .now()), .success)
+    defer { self.otherDisplay.swBrightnessSemaphore.signal() }
+    XCTAssertEqual(self.otherDisplay.swBrightnessSemaphore.wait(timeout: .now()), .timedOut)
   }
 }

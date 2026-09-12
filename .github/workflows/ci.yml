@@ -67,6 +67,9 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER= \
             2>&1 | tee build/xcodebuild-test.log
 
+      - name: Validate build script failure handling
+        run: build/test-build.sh
+
       # actions/upload-artifact v4.6.2
       - name: Upload test log
         if: failure()

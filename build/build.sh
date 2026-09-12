@@ -18,6 +18,7 @@ export COPYFILE_DISABLE=1
 export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
 
 BUILT_APP="$DERIVED_DATA_DIR/Build/Products/Release/$APP_NAME.app"
+CODESIGN_BIN="${CODESIGN_BIN:-/usr/bin/codesign}"
 APP_ENTITLEMENTS="$DERIVED_DATA_DIR/Build/Intermediates.noindex/MonitorControl.build/Release/MonitorControl.build/$APP_NAME.app.xcent"
 USE_ADHOC_FALLBACK=0
 
@@ -67,6 +68,11 @@ if [ "$BUILD_STATUS" -ne 0 ]; then
   set -e
 fi
 
+if [ "$BUILD_STATUS" -ne 0 ]; then
+  echo "Error: xcodebuild failed with status $BUILD_STATUS"
+  exit "$BUILD_STATUS"
+fi
+
 if [ -d "$BUILT_APP" ]; then
   echo "Copying $APP_NAME.app to build/ ..."
   rm -rf "$OUTPUT_DIR/$APP_NAME.app"
@@ -78,13 +84,14 @@ if [ -d "$BUILT_APP" ]; then
   sanitize_bundle_metadata "$OUTPUT_DIR/$APP_NAME.app"
   if [ "$USE_ADHOC_FALLBACK" -eq 1 ] && [ -f "$APP_ENTITLEMENTS" ]; then
     echo "Finalizing ad-hoc app signature..."
-    /usr/bin/codesign --force --deep --sign - -o runtime --entitlements "$APP_ENTITLEMENTS" --timestamp=none --generate-entitlement-der "$OUTPUT_DIR/$APP_NAME.app"
-    if [ "$BUILD_STATUS" -ne 0 ]; then
-      echo "Recovered build output after Xcode codesign failure."
-    fi
+    "$CODESIGN_BIN" --force --deep --sign - -o runtime --entitlements "$APP_ENTITLEMENTS" --timestamp=none --generate-entitlement-der "$OUTPUT_DIR/$APP_NAME.app"
+  fi
+  if ! "$CODESIGN_BIN" --verify --deep --strict "$OUTPUT_DIR/$APP_NAME.app"; then
+    echo "Error: final app signature verification failed"
+    exit 1
   fi
   echo "Done: $OUTPUT_DIR/$APP_NAME.app"
 else
   echo "Error: built app not found at $BUILT_APP"
-  exit "${BUILD_STATUS:-1}"
+  exit 1
 fi
