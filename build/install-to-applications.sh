@@ -12,7 +12,7 @@
 #
 set -euo pipefail
 
-REPO="/Users/shayprasad/Documents/Side Projects and Hobbies/Coding/XDRMonitorControl"
+REPO="/Users/shayprasad/Documents/Side Projects and Hobbies/Coding/LumaControl"
 # Source bundle. Pass a path as $1 to install a build from a different derived-data folder
 # (each build should use a fresh one, so this is the normal case rather than the exception).
 SRC="${1:-$REPO/build/DerivedDataRelease/Build/Products/Release/LumaControl.app}"
