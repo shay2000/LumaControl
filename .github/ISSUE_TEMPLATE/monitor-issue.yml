@@ -43,7 +43,7 @@ body:
         examples:
             - **macOS version**: 11.4 Big Sur
             - **Mac model**: MacBook Pro (16-inch, 2019)
-            - **LumaControl version**: v0.3.0
+            - **LumaControl version**: v1.0.0
             - **Monitor(s)**: LG 38GN950, LG 27UN83A
             - **Monitor Cable(s)/Connection(s)**:  
             &nbsp;&nbsp;- Mac Mini -> DisplayPort 2.1 -> LG 38GN950
