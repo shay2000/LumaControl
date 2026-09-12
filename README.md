@@ -13,6 +13,9 @@
     <a href="https://github.com/shay2000/LumaControl/actions/workflows/ci.yml">
       <img src="https://github.com/shay2000/LumaControl/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"/>
     </a>
+    <a href="https://buymeacoffee.com/shay2k">
+      <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"/>
+    </a>
   </p>
 </div>
 
@@ -75,6 +78,16 @@ git push origin v0.3.0
 ```
 
 Build numbers must increase so installed copies can receive Sparkle updates.
+
+## Support LumaControl
+
+LumaControl is built and maintained in my spare time, and it will always be free. If it earns a place in your menu bar, you can buy me a coffee:
+
+<p align="center">
+  <a href="https://buymeacoffee.com/shay2k">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"/>
+  </a>
+</p>
 
 ## Credits and license
 
