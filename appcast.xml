@@ -6,12 +6,12 @@
     <description>Most recent release of LumaControl</description>
     <language>en</language>
     <item>
-      <title>Version 0.2.0</title>
-      <pubDate>Sat, 12 Sep 2026 01:02:27 +0000</pubDate>
-      <sparkle:version>33</sparkle:version>
-      <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
-      <enclosure url="https://github.com/shay2000/LumaControl/releases/download/v0.2.0/XDRMonitorControl-0.2.0-universal.dmg" length="6182768" type="application/x-apple-diskimage"
-              sparkle:edSignature="s+miFokxXgSuIZ+yfC7mCwoUqNdI58rGytcqdmwh2O8ax0wgzQNHwYCJteMDWco4oVZ+ZjhGTchxSvZF0GyhDw=="/>
+      <title>Version 0.3.0</title>
+      <pubDate>Sat, 12 Sep 2026 11:25:22 +0000</pubDate>
+      <sparkle:version>39</sparkle:version>
+      <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+      <enclosure url="https://github.com/shay2000/LumaControl/releases/download/v0.3.0/LumaControl-0.3.0-universal.dmg" length="6232483" type="application/x-apple-diskimage"
+              sparkle:edSignature="iuSzHWN9GUPPdvOhmaxiCUcXJb31ftKPygwdMM9WZjrB4EMoQTx9+gB8JhkVM+sUU0LDmDGbvYJLCyH1ULIsDA=="/>
     </item>
   </channel>
 </rss>
