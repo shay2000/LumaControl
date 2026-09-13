@@ -19,11 +19,14 @@ class OtherDisplay: Display {
       case PollingMode.minimal.rawValue: return 1
       case PollingMode.normal.rawValue: return 5
       case PollingMode.heavy.rawValue: return 20
-      case PollingMode.custom.rawValue: return prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId)
+      // Clamp at the source: a stale negative value saved by an older version must not
+      // reach `UInt(self.pollingCount)` in the setup paths, where the conversion is a
+      // fatal trap. Zero means "no polling", which is the sensible reading of a bad value.
+      case PollingMode.custom.rawValue: return max(0, prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId))
       default: return PollingMode.none.rawValue
       }
     }
-    set { prefs.set(newValue, forKey: PrefKey.pollingCount.rawValue + self.prefsId) }
+    set { prefs.set(max(0, newValue), forKey: PrefKey.pollingCount.rawValue + self.prefsId) }
   }
 
   override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
@@ -416,11 +419,10 @@ class OtherDisplay: Display {
     guard app.sleepID == 0, app.reconfigureID == 0, !self.readPrefAsBool(key: .forceSw), !self.readPrefAsBool(key: .unavailableDDC, for: command) else {
       return values
     }
-    // Guard the read against a bad stored count. `pollingCount` comes from a free-form
-    // text field, and a stale negative value (saved by an older version) would trap on
-    // the UInt conversions below; zero tries means "don't read".
-    let safeTries = max(tries, 0)
-    if safeTries == 0 {
+    // `pollingCount` is clamped at its getter, so callers should never pass a bad value
+    // here. This is defense in depth: zero tries means "don't read", and the loops below
+    // would otherwise also clamp it themselves.
+    if tries == 0 {
       return nil
     }
     let controlCodes = self.getRemapControlCodes(command: command)
@@ -431,14 +433,14 @@ class OtherDisplay: Display {
       }
       DisplayManager.shared.globalDDCQueue.sync {
         if let unwrappedDelay = delay {
-          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, readSleepTime: UInt32(unwrappedDelay / 1000), numOfRetryAttemps: UInt8(min(safeTries, 255)))
+          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, readSleepTime: UInt32(unwrappedDelay / 1000), numOfRetryAttemps: UInt8(min(tries, 255)))
         } else {
-          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, numOfRetryAttemps: UInt8(min(safeTries, 255)))
+          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, numOfRetryAttemps: UInt8(min(tries, 255)))
         }
       }
     } else {
       DisplayManager.shared.globalDDCQueue.sync {
-        values = self.ddc?.read(command: controlCode, tries: safeTries, minReplyDelay: delay)
+        values = self.ddc?.read(command: controlCode, tries: tries, minReplyDelay: delay)
       }
     }
     return values
