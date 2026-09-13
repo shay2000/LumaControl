@@ -9,13 +9,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
   var lastMenuRelevantDisplayId: CGDirectDisplayID = 0
 
   func clearMenu() {
-    var items: [NSMenuItem] = []
-    for i in 0 ..< self.items.count {
-      items.append(self.items[i])
-    }
-    for item in items {
-      self.removeItem(item)
-    }
+    self.removeAllItems()
     self.combinedSliderHandler.removeAll()
   }
 
@@ -41,7 +35,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       let externalDisplays = DisplayManager.shared.displays.filter {
         CGDisplayIsBuiltin($0.identifier) == 0
       }
-      if externalDisplays.count > 0 {
+      if !externalDisplays.isEmpty {
         showIcon = true
       }
     }
@@ -72,7 +66,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       }
     }
     if numOfDisplays != 0 {
-      let asSubMenu: Bool = (displays.count > 3 && !relevant && !combine && app.macOS10()) ? true : false
+      let asSubMenu = displays.count > 3 && !relevant && !combine && app.macOS10()
       var iterator = 0
       for display in displays where (!relevant || DisplayManager.resolveEffectiveDisplayID(display.identifier) == relevantDisplayID) && !display.isDummy {
         iterator += 1
@@ -215,7 +209,7 @@ class MenuHandler: NSMenu, NSMenuDelegate {
   }
 
   func updateDisplayMenu(display: Display, asSubMenu: Bool, numOfDisplays: Int) {
-    os_log("Addig menu items for display %{public}@", type: .info, "\(display.identifier)")
+    os_log("Adding menu items for display %{public}@", type: .info, "\(display.identifier)")
     let monitorSubMenu: NSMenu = asSubMenu ? NSMenu() : self
     var addedSliderHandlers: [SliderHandler] = []
     display.sliderHandler[.audioSpeakerVolume] = nil

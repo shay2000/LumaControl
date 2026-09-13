@@ -156,10 +156,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
       keys.append(contentsOf: [.mute, .volumeUp, .volumeDown])
     }
     // Remove brightness keys if no external displays are connected, but only if brightness fine control is not active
-    var hasExternalDisplay = false
-    for display in DisplayManager.shared.getAllDisplays() where !display.isBuiltIn() {
-      hasExternalDisplay = true
-    }
+    let hasExternalDisplay = DisplayManager.shared.getAllDisplays().contains { !$0.isBuiltIn() }
     // Disengage brightness keys on sleep so MacBook native screen can be controlled meanwhile
     let isTransient = app.sleepID != 0 || app.reconfigureID != 0
     let disengageBrightness = !hasExternalDisplay || isTransient

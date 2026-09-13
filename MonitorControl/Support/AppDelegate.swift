@@ -400,8 +400,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func setStartAtLogin(enabled: Bool) {
-    let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-    SMLoginItemSetEnabled(identifier, enabled)
+    guard let bundleID = Bundle.main.bundleIdentifier else {
+      os_log("Cannot toggle start at login without a bundle identifier.", type: .error)
+      return
+    }
+    SMLoginItemSetEnabled("\(bundleID)Helper" as CFString, enabled)
   }
 
   func getSystemSettings() -> [String: AnyObject]? {

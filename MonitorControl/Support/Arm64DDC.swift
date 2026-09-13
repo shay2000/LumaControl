@@ -70,17 +70,14 @@ class Arm64DDC: NSObject {
   }
 
   static func read(service: IOAVService?, command: UInt8, writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, readSleepTime: UInt32? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> (current: UInt16, max: UInt16)? {
-    var values: (UInt16, UInt16)?
     var send: [UInt8] = [command]
     var reply = [UInt8](repeating: 0, count: 11)
-    if Self.performDDCCommunication(service: service, send: &send, reply: &reply, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, readSleepTime: readSleepTime, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime) {
-      let max = UInt16(reply[6]) * 256 + UInt16(reply[7])
-      let current = UInt16(reply[8]) * 256 + UInt16(reply[9])
-      values = (current, max)
-    } else {
-      values = nil
+    guard Self.performDDCCommunication(service: service, send: &send, reply: &reply, writeSleepTime: writeSleepTime, numOfWriteCycles: numOfWriteCycles, readSleepTime: readSleepTime, numOfRetryAttemps: numOfRetryAttemps, retrySleepTime: retrySleepTime) else {
+      return nil
     }
-    return values
+    let max = UInt16(reply[6]) * 256 + UInt16(reply[7])
+    let current = UInt16(reply[8]) * 256 + UInt16(reply[9])
+    return (current, max)
   }
 
   static func write(service: IOAVService?, command: UInt8, value: UInt16, writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
@@ -92,13 +89,15 @@ class Arm64DDC: NSObject {
   static func performDDCCommunication(service: IOAVService?, send: inout [UInt8], reply: inout [UInt8], writeSleepTime: UInt32? = nil, numOfWriteCycles: UInt8? = nil, readSleepTime: UInt32? = nil, numOfRetryAttemps: UInt8? = nil, retrySleepTime: UInt32? = nil) -> Bool {
     let dataAddress = ARM64_DDC_DATA_ADDRESS
     var success = false
-    guard service != nil else {
+    guard let service = service else {
       return success
     }
     var packet: [UInt8] = [UInt8(0x80 | (send.count + 1)), UInt8(send.count)] + send + [0] // Note: the last byte is the place of the checksum, see next line!
     packet[packet.count - 1] = self.checksum(chk: send.count == 1 ? ARM64_DDC_7BIT_ADDRESS << 1 : ARM64_DDC_7BIT_ADDRESS << 1 ^ dataAddress, data: &packet, start: 0, end: packet.count - 2)
-    for _ in 1 ... (numOfRetryAttemps ?? 4) + 1 {
-      for _ in 1 ... max((numOfWriteCycles ?? 2) + 0, 1) {
+    // Int arithmetic: a retry count of 255 (the clamp in OtherDisplay.readDDCValues allows
+    // exactly that) would overflow UInt8 on the `+ 1` and trap.
+    for _ in 1 ... Int(numOfRetryAttemps ?? 4) + 1 {
+      for _ in 1 ... max(numOfWriteCycles ?? 2, 1) {
         usleep(writeSleepTime ?? 10000)
         success = IOAVServiceWriteI2C(service, UInt32(ARM64_DDC_7BIT_ADDRESS), UInt32(dataAddress), &packet, UInt32(packet.count)) == 0
       }

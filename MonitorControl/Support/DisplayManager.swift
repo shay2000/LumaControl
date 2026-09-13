@@ -101,7 +101,7 @@ class DisplayManager {
   func destroyAllShades() -> Bool {
     var ret = false
     for displayID in self.shades.keys {
-      os_log("Attempting to destory shade for display  %{public}@", type: .info, String(displayID))
+      os_log("Attempting to destroy shade for display  %{public}@", type: .info, String(displayID))
       if self.destroyShade(displayID: displayID) {
         ret = true
       }
@@ -240,22 +240,11 @@ class DisplayManager {
     self.displays.compactMap { $0 as? OtherDisplay }
   }
 
-  func sortDisplays() {
-    // Opsiyonel: sıralamadan önce log al
-    let before = displays.map { $0.name }
-    os_log("Displays before sorting: %{public}@", before)
-    
-    // In‑place sıralama
-    displays.sort { lhs, rhs in
-      lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
-    }
-    
-    // Opsiyonel: sıralamadan sonra log al
-    let after = displays.map { $0.name }
-    os_log("Displays after sorting: %{public}@", after)
-  }
-  
   /// Sorts the given displays by their friendly name.
+  ///
+  /// The result is in descending name order on purpose: callers insert each display's
+  /// menu block at index 0, so the last display processed ends up at the top of the
+  /// menu. Feeding the blocks in descending order renders the menu in ascending order.
   ///
   /// The list is passed in explicitly. An earlier version sorted `self.displays` and
   /// returned that, which silently discarded whatever filtering the caller had done —
@@ -272,11 +261,8 @@ class DisplayManager {
     }
   }
 
-
-
-  /// displays dizisini sıralar ve döner
   func getAllDisplays() -> [Display] {
-    return displays
+    self.displays
   }
 
   func getDdcCapableDisplays() -> [OtherDisplay] {
@@ -320,19 +306,10 @@ class DisplayManager {
   }
   
   func addDisplayCounterSuffixes() {
-    var nameDisplays: [String: [Display]] = [:]
-    for display in self.displays {
-      if nameDisplays[display.name] != nil {
-        nameDisplays[display.name]?.append(display)
-      } else {
-        nameDisplays[display.name] = [display]
-      }
-    }
-    for nameDisplayKey in nameDisplays.keys where nameDisplays[nameDisplayKey]?.count ?? 0 > 1 {
-      for i in 0 ... (nameDisplays[nameDisplayKey]?.count ?? 1) - 1 {
-        if let display = nameDisplays[nameDisplayKey]?[i] {
-          display.name = "" + display.name + " (" + String(i + 1) + ")"
-        }
+    let displaysByName = Dictionary(grouping: self.displays, by: { $0.name })
+    for (_, sameNameDisplays) in displaysByName where sameNameDisplays.count > 1 {
+      for (index, display) in sameNameDisplays.enumerated() {
+        display.name = "\(display.name) (\(index + 1))"
       }
     }
   }

@@ -93,12 +93,9 @@ class OtherDisplay: Display {
     var maxDDCValue = UInt16(DDC_MAX_DETECT_LIMIT)
     var currentDDCValue: UInt16
     switch command {
-    case .audioSpeakerVolume: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125)
+    case .audioSpeakerVolume: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125) // lower default audio value as high volume might rattle the user.
     case .contrast: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.750)
     default: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 1.000)
-    }
-    if command == .audioSpeakerVolume {
-      currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125) // lower default audio value as high volume might rattle the user.
     }
     os_log("Setting up display %{public}@ for %{public}@", type: .info, String(self.identifier), String(reflecting: command))
     if !self.isSw() {
@@ -259,11 +256,7 @@ class OtherDisplay: Display {
   }
 
   func isSw() -> Bool {
-    if prefs.bool(forKey: PrefKey.forceSw.rawValue + self.prefsId) || self.isSwOnly() {
-      return true
-    } else {
-      return false
-    }
+    prefs.bool(forKey: PrefKey.forceSw.rawValue + self.prefsId) || self.isSwOnly()
   }
 
   let swAfterOsdAnimationSemaphore = DispatchSemaphore(value: 1)

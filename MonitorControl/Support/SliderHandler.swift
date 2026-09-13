@@ -525,16 +525,10 @@ class SliderHandler {
         self.values[displayID] = value
         slider.setHighlightItem(displayID, value: value)
       }
-      var maxVal: Float = 0
-      var minVal: Float = .greatestFiniteMagnitude
-      var num = 0
-      for key in self.values.keys {
-        if let val = values[key] {
-          maxVal = max(maxVal, val)
-          minVal = min(minVal, val)
-          num += 1
-        }
-      }
+      let knownValues = self.values.values
+      let maxVal = knownValues.max() ?? 0
+      let minVal = knownValues.min() ?? .greatestFiniteMagnitude
+      let num = knownValues.count
       let clampedValue = min(value, Float(slider.maxValue))
       slider.floatValue = clampedValue
       self.updateIcon()

@@ -83,6 +83,10 @@ class MenuslidersPrefsViewController: NSViewController, SettingsPane {
     prefs.addObserver(self, forKeyPath: PrefKey.menuIcon.rawValue, context: nil)
   }
 
+  deinit {
+    prefs.removeObserver(self, forKeyPath: PrefKey.menuIcon.rawValue)
+  }
+
   func populateSettings() {
     self.iconShow.selectItem(withTag: prefs.integer(forKey: PrefKey.menuIcon.rawValue))
     self.menuItemStyle.selectItem(withTag: prefs.integer(forKey: PrefKey.menuItemStyle.rawValue))

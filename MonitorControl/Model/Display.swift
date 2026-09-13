@@ -74,7 +74,7 @@ class Display: Equatable {
   }
 
   private func getKey(key: PrefKey? = nil, for command: Command? = nil) -> String {
-    (key ?? PrefKey.value).rawValue + (command != nil ? String((command ?? Command.none).rawValue) : "") + self.prefsId
+    (key ?? PrefKey.value).rawValue + (command.map { String($0.rawValue) } ?? "") + self.prefsId
   }
 
   init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
@@ -359,10 +359,7 @@ class Display: Equatable {
     guard !self.isVirtual, !self.isDummy else {
       return false
     }
-    if self.getSwBrightness() < 1 {
-      return true
-    }
-    return false
+    return self.getSwBrightness() < 1
   }
 
   func refreshBrightness() -> Float {
@@ -370,10 +367,6 @@ class Display: Equatable {
   }
 
   func isBuiltIn() -> Bool {
-    if CGDisplayIsBuiltin(self.identifier) != 0 {
-      return true
-    } else {
-      return false
-    }
+    CGDisplayIsBuiltin(self.identifier) != 0
   }
 }

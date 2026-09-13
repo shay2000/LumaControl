@@ -70,7 +70,7 @@ public class IntelDDC {
     return success
   }
 
-  public func read(command: UInt8, tries: UInt = 1, replyTransactionType _: IOOptionBits? = nil, minReplyDelay: UInt64? = nil, errorRecoveryWaitTime: UInt32? = nil, writeSleepTime: UInt32 = 10000) -> (UInt16, UInt16)? {
+  public func read(command: UInt8, tries: UInt = 1, minReplyDelay: UInt64? = nil, errorRecoveryWaitTime: UInt32? = nil, writeSleepTime: UInt32 = 10000) -> (UInt16, UInt16)? {
     var data: [UInt8] = Array(repeating: 0, count: 5)
     var replyData: [UInt8] = Array(repeating: 0, count: 11)
 
@@ -82,7 +82,8 @@ public class IntelDDC {
     let dataCount = UInt32(data.count)
     let replyDataCount = UInt32(replyData.count)
 
-    for i in 1 ... tries {
+    // A try count of zero would make `1 ... 0` an invalid range and trap, so treat it as a single try.
+    for i in 1 ... max(tries, 1) {
       usleep(writeSleepTime)
       usleep(errorRecoveryWaitTime ?? 0)
       let sent = data.withUnsafeMutableBytes { sendBuffer -> Bool in
