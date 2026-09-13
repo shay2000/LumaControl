@@ -21,9 +21,13 @@ class OtherDisplay: Display {
       case PollingMode.heavy.rawValue: return 20
       // Clamp at the source: a stale negative value saved by an older version must not
       // reach `UInt(self.pollingCount)` in the setup paths, where the conversion is a
-      // fatal trap. Zero means "no polling", which is the sensible reading of a bad value.
-      case PollingMode.custom.rawValue: return max(0, prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId))
-      default: return PollingMode.none.rawValue
+      // fatal trap. The upper bound matches the Arm64 path's 255-retry cap, so a huge
+      // value cannot hang the Intel read loop for minutes on end. Zero means "no polling",
+      // which is the sensible reading of a bad value. The default arm must also return 0,
+      // NOT `PollingMode.none.rawValue` (-2): an out-of-range stored polling mode falls
+      // through here, and -2 would trap the same way.
+      case PollingMode.custom.rawValue: return min(255, max(0, prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId)))
+      default: return 0
       }
     }
     set { prefs.set(max(0, newValue), forKey: PrefKey.pollingCount.rawValue + self.prefsId) }
