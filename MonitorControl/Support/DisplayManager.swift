@@ -363,7 +363,7 @@ class DisplayManager {
       if (otherDisplay.readPrefAsFloat(for: .brightness) == 0 && !prefs.bool(forKey: PrefKey.disableCombinedBrightness.rawValue)) || (otherDisplay.readPrefAsFloat(for: .brightness) < otherDisplay.combinedBrightnessSwitchingValue() && !prefs.bool(forKey: PrefKey.separateCombinedScale.rawValue) && !prefs.bool(forKey: PrefKey.disableCombinedBrightness.rawValue)) || otherDisplay.isSw() {
         let savedPrefValue = otherDisplay.readPrefAsFloat(key: .SwBrightness)
         if otherDisplay.getSwBrightness() != savedPrefValue {
-          OSDUtils.popEmptyOsd(displayID: otherDisplay.identifier, command: Command.brightness) // This will give the user a hint why is the brightness suddenly changes.
+          OSDUtils.popEmptyOsd(displayID: otherDisplay.identifier, command: Command.brightness) // This gives the user a hint why the brightness suddenly changed.
         }
         otherDisplay.savePref(otherDisplay.getSwBrightness(), key: .SwBrightness)
         os_log("Restoring sw brightness to %{public}@ on other display %{public}@", type: .info, String(savedPrefValue), String(otherDisplay.identifier))
@@ -530,7 +530,7 @@ class DisplayManager {
         return name
       }
     }
-    if let screen = getByDisplayID(displayID: displayID) { // MARK: This, and NSScreen+Extension.swift will not be needed when we drop MacOS 10 support.
+    if let screen = getByDisplayID(displayID: displayID) { // MARK: This, and NSScreen+Extension.swift will not be needed when we drop macOS 10 support.
 
       if #available(macOS 10.15, *) {
         return screen.localizedName

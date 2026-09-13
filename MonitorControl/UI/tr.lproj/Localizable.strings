@@ -2,7 +2,7 @@
 "About" = "Hakkında";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "Başka bir uygulama, parlaklığı veya renkleri değiştirdiği için sorunlara neden oluyor gibi görünüyor.\n\nBunu çözmek için diğer uygulamadan çıkmanız veya LumaControl'deki ekranlarınız için gama kontrolünü devre dışı bırakmanız gerekiyor!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Başka bir uygulama, parlaklığı veya renkleri değiştirdiği için sorunlara neden oluyor gibi görünüyor.\n\nBunu çözmek için diğer uygulamadan çıkmanız veya LumaControl'deki ekranlarınız için gama kontrolünü devre dışı bırakmanız gerekiyor!";
 
 /* Shown in the main prefs window */
 "App menu" = "Uygulama Menüsü";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Bu ekranın donanım DDC kontrolünü desteklediği bildiriliyor. Sorunlarla karşılaşırsanız, yazılım kontrolünü zorlamak için donanım DDC kontrolünü devre dışı bırakabilirsiniz.";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Bu ekran, yerel Apple parlaklık protokolünü destekler. Bu, macOS'un bu ekranı LumaControl olmadan da kontrol etmesini sağlar.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Bu ekran, yerel Apple parlaklık protokolünü destekler. Bu, macOS'un bu ekranı LumaControl olmadan da kontrol etmesini sağlar.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Bu sanal bir ekrandır (örnekler: AirPlay, Sidecar, DisplayLink Dock veya benzeri aracılığıyla bağlanan ekran), donanım veya yazılımla oynanabilir kontrole izin vermez. Gölgeleme, bir yedek olarak kullanılır, ancak yalnızca ayna olmayan senaryolarda. Fare imleci etkilenmeyecektir ve tam ekran moduna girerken/çıkılırken eserler görünebilir.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Bu sanal bir ekrandır (örnekler: AirPlay, Sidecar, DisplayLink Dock veya benzeri aracılığıyla bağlanan ekran), donanım veya yazılımla oynanabilir kontrole izin vermez. Gölgeleme, bir yedek olarak kullanılır, ancak yalnızca ayna olmayan senaryolarda. Fare imleci etkilenmeyecektir ve tam ekran moduna girerken/çıkılırken eserler görünebilir.";
 
 /* Unknown display name */
 "Unknown" = "Bilinmeyen";

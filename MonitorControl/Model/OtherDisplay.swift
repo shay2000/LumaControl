@@ -484,7 +484,7 @@ class OtherDisplay: Display {
     let deNormalizedValue = (maxDDCValue - minDDCValue) * curvedValue + minDDCValue
     var intDDCValue = UInt16(min(max(deNormalizedValue, minDDCValue), maxDDCValue))
     if from > 0, command == Command.audioSpeakerVolume {
-      intDDCValue = max(1, intDDCValue) // Never let sound to mute accidentally, keep it digitally to at digital 1 if needed as muting breaks some displays
+      intDDCValue = max(1, intDDCValue) // Never let the volume mute accidentally; keep the digital value at 1 or higher if needed, as muting breaks some displays
     }
     return intDDCValue
   }

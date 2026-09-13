@@ -2,7 +2,7 @@
 "About" = "O aplikaci";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "Zdá se, že jas a barvy ovládá ještě nějaká další aplikace, což způsobuje problémy.\n\nBuďto jinou aplikaci ukončete, nebo v LumaControl vypněte ovládání gamy pro Vaše displeje!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Zdá se, že jas a barvy ovládá ještě nějaká další aplikace, což způsobuje problémy.\n\nBuďto jinou aplikaci ukončete, nebo v LumaControl vypněte ovládání gamy pro Vaše displeje!";
 
 /* Shown in the main prefs window */
 "App menu" = "Nabídka";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Tento displej by měl podporovat hardwarové DDC ovládání. Pokud narazíte na problém, můžete hardwarové ovládání DDC vypnout a použít vynucené softwarové ovládání.";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Tento displej podporuje nativní jasový protokol Apple. Díky tomu ho může macOS ovládat i bez LumaControl.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Tento displej podporuje nativní jasový protokol Apple. Díky tomu ho může macOS ovládat i bez LumaControl.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Toto je virtuální displej (např. AirPlay, Sidecar, DisplayLink a podobně), který neumožňuje hardwarové, ani softwarové ovládání gamy. Jako náhrada slouží stínování, ale jen za předpokladu, že displej není nastaven na zrcadlení. Změny se neprojeví na ukazateli myši a můžou se objevit vizuální artefakty při přepínání režimu na celou obrazovku.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Toto je virtuální displej (např. AirPlay, Sidecar, DisplayLink a podobně), který neumožňuje hardwarové, ani softwarové ovládání gamy. Jako náhrada slouží stínování, ale jen za předpokladu, že displej není nastaven na zrcadlení. Změny se neprojeví na ukazateli myši a můžou se objevit vizuální artefakty při přepínání režimu na celou obrazovku.";
 
 /* Unknown display name */
 "Unknown" = "Neznámý";

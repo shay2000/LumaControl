@@ -2,7 +2,7 @@
 "About" = "О программе";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "Похоже другое приложение изменяет яркость или цвета, что вызывает проблемы.\n\nДля решения этой проблемы вам нужно закрыть другое приложение или отключить управление гаммой для ваших дисплеев в LumaControl!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Похоже другое приложение изменяет яркость или цвета, что вызывает проблемы.\n\nДля решения этой проблемы вам нужно закрыть другое приложение или отключить управление гаммой для ваших дисплеев в LumaControl!";
 
 /* Shown in the main prefs window */
 "App menu" = "Меню";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Этот дисплей сообщает, что поддерживает аппаратное управление через DDC. В случае проблем, вы можете отключить аппаратное управление через DDC, чтобы принудительно использовать программное управление.";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Этот дисплей поддерживает нативный протокол яркости Apple. Это позволяет macOS управлять этим дисплеем без использования LumaControl.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Этот дисплей поддерживает нативный протокол яркости Apple. Это позволяет macOS управлять этим дисплеем без использования LumaControl.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Это виртуальный дисплей (например: AirPlay, Sidecar, дисплей подключенный через док-станцию DisplayLink или аналогичное устройство), который не поддерживает аппаратное или программное управление гаммой. Затенение используется в качестве замены, но только в режимах без видео-повтора. При этом курсор мыши останется неизменным и могут возникнуть артефакты при входе/выходе из полноэкранного режима.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Это виртуальный дисплей (например: AirPlay, Sidecar, дисплей подключенный через док-станцию DisplayLink или аналогичное устройство), который не поддерживает аппаратное или программное управление гаммой. Затенение используется в качестве замены, но только в режимах без видео-повтора. При этом курсор мыши останется неизменным и могут возникнуть артефакты при входе/выходе из полноэкранного режима.";
 
 /* Unknown display name */
 "Unknown" = "Неизвестный";

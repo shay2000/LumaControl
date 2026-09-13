@@ -214,7 +214,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     guard self.sleepID == 0, dispatchedReconfigureID == self.reconfigureID else {
       return
     }
-    os_log("Request for configuration with reconfigreID %{public}@", type: .info, String(dispatchedReconfigureID))
+    os_log("Request for configuration with reconfigureID %{public}@", type: .info, String(dispatchedReconfigureID))
     self.reconfigureID = 0
     DisplayManager.shared.gammaInterferenceCounter = 0
     DisplayManager.shared.configureDisplays()

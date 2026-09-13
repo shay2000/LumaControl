@@ -2,7 +2,7 @@
 "About" = "Informazioni";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!";
 
 /* Shown in the main prefs window */
 "App menu" = "App menu";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Questo monitor supporta il controllo DDC hardware. Se rilevi dei problemi, puoi disabilitarlo e forzare il controllo software.";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Questo monitor supporta il protocollo nativo Apple della luminosità. Questo permette al macOS di controllare il monitor anhe senza l'utilizzo di LumaControl.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Questo monitor supporta il protocollo nativo Apple della luminosità. Questo permette al macOS di controllare il monitor anhe senza l'utilizzo di LumaControl.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Questo monitor è un di tipo virtuale (esempio: AirPlay, Sidecar, connessione via via DisplayLink Dock o simili) e non consente il controllo hardware o software della gammatable. La sfumatura è utilizzata in sostituzione ma solo in modalità non duplicazione. Il cursore del mouse non rimane invariato e si potrebbero verificare artefatti entrando/uscendo dalla modalità a pieno schermo.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Questo monitor è un di tipo virtuale (esempio: AirPlay, Sidecar, connessione via via DisplayLink Dock o simili) e non consente il controllo hardware o software della gammatable. La sfumatura è utilizzata in sostituzione ma solo in modalità non duplicazione. Il cursore del mouse non rimane invariato e si potrebbero verificare artefatti entrando/uscendo dalla modalità a pieno schermo.";
 
 /* Unknown display name */
 "Unknown" = "Sconosciuto";

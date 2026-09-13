@@ -79,7 +79,7 @@ class SliderHandler {
     let barXDRMidColor = NSColor.systemOrange
     let barXDREndColor = NSColor.systemRed
     let xdrThresholdMarkerColor = NSColor.labelColor.withAlphaComponent(0.35)
-    let highlightDisplayIndicatorColor = NSColor.labelColor.withAlphaComponent(0.85) // This is visible if there is more the 2 displays
+    let highlightDisplayIndicatorColor = NSColor.labelColor.withAlphaComponent(0.85) // This is visible if there are more than 2 displays
     let tickMarkColor = NSColor.systemGray.withAlphaComponent(0.5)
     var isXDRSlider: Bool = false
 

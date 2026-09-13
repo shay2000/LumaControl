@@ -2,7 +2,7 @@
 "About" = "Névjegy";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "Úgy tűnik, egy másik alkalmazás is módosítja a fényerőt vagy a színeket ami problémát okoz.\n\nEz megoldható a másik alkalmazás bezárásával vagy a LumaControl-ban a kijelzők gamma vezérlésének letiltásával!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Úgy tűnik, egy másik alkalmazás is módosítja a fényerőt vagy a színeket ami problémát okoz.\n\nEz megoldható a másik alkalmazás bezárásával vagy a LumaControl-ban a kijelzők gamma vezérlésének letiltásával!";
 
 /* Shown in the main prefs window */
 "App menu" = "Menü";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Ez a kijelző támogatja a hardveres vezérlést. Amennyiben problémákat tapasztal, kapcsolja ki a hardveres DDC vezérlést a szoftveres alternatíva érdekében!";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Ez a kijelző az Apple saját fényerőkezelő protokolját támogatja. Ez lehetővé teszi a macOS számára is a fényerő vezérlését, LumaControl nélkül is.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Ez a kijelző az Apple saját fényerőkezelő protokolját támogatja. Ez lehetővé teszi a macOS számára is a fényerő vezérlését, LumaControl nélkül is.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Ez egy virtuális kijelző (AirPlay, Sidecar, DisplayLink állomás vagy hasonló), amely nem támogatja sem a hardveres, sem a szoftveres gamma táblázat alapú fényerőkezelést. Emiatt a program árnyékolást alkalmaz, amennyiben a kijelző nincs tükrözve. Az egérkurzorra az árnyékolás nincs hatással, valamint képernyőhibák jelentkezhetnek, amikor teljes képernyős ablakváltás történik.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Ez egy virtuális kijelző (AirPlay, Sidecar, DisplayLink állomás vagy hasonló), amely nem támogatja sem a hardveres, sem a szoftveres gamma táblázat alapú fényerőkezelést. Emiatt a program árnyékolást alkalmaz, amennyiben a kijelző nincs tükrözve. Az egérkurzorra az árnyékolás nincs hatással, valamint képernyőhibák jelentkezhetnek, amikor teljes képernyős ablakváltás történik.";
 
 /* Unknown display name
  Unknown model
