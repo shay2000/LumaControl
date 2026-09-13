@@ -416,6 +416,13 @@ class OtherDisplay: Display {
     guard app.sleepID == 0, app.reconfigureID == 0, !self.readPrefAsBool(key: .forceSw), !self.readPrefAsBool(key: .unavailableDDC, for: command) else {
       return values
     }
+    // Guard the read against a bad stored count. `pollingCount` comes from a free-form
+    // text field, and a stale negative value (saved by an older version) would trap on
+    // the UInt conversions below; zero tries means "don't read".
+    let safeTries = max(tries, 0)
+    if safeTries == 0 {
+      return nil
+    }
     let controlCodes = self.getRemapControlCodes(command: command)
     let controlCode = controlCodes.count == 0 ? command.rawValue : controlCodes[0]
     if Arm64DDC.isArm64 {
@@ -424,14 +431,14 @@ class OtherDisplay: Display {
       }
       DisplayManager.shared.globalDDCQueue.sync {
         if let unwrappedDelay = delay {
-          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, readSleepTime: UInt32(unwrappedDelay / 1000), numOfRetryAttemps: UInt8(min(tries, 255)))
+          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, readSleepTime: UInt32(unwrappedDelay / 1000), numOfRetryAttemps: UInt8(min(safeTries, 255)))
         } else {
-          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, numOfRetryAttemps: UInt8(min(tries, 255)))
+          values = Arm64DDC.read(service: self.arm64avService, command: controlCode, numOfRetryAttemps: UInt8(min(safeTries, 255)))
         }
       }
     } else {
       DisplayManager.shared.globalDDCQueue.sync {
-        values = self.ddc?.read(command: controlCode, tries: tries, minReplyDelay: delay)
+        values = self.ddc?.read(command: controlCode, tries: safeTries, minReplyDelay: delay)
       }
     }
     return values

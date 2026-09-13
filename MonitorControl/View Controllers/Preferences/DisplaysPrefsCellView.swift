@@ -73,15 +73,19 @@ class DisplaysPrefsCellView: NSTableCellView {
     if let display = display as? OtherDisplay {
       let newValue = sender.stringValue
       let originalValue = "\(display.pollingCount)"
+      // Clamp on save: a negative or zero count later reaches `UInt(self.pollingCount)`
+      // in setupCurrentAndMaxValues, where `UInt(-1)` is a fatal "Negative value is not
+      // representable" trap.
+      let clampedValue = Int(newValue).map { max(0, $0) }
       if newValue.isEmpty {
         self.pollingCount.stringValue = originalValue
-      } else if let intValue = Int(newValue) {
-        self.pollingCount.stringValue = String(intValue)
+      } else if let clamped = clampedValue {
+        self.pollingCount.stringValue = String(clamped)
       } else {
         self.pollingCount.stringValue = ""
       }
-      if newValue != originalValue, !newValue.isEmpty, let newValue = Int(newValue) {
-        display.pollingCount = newValue
+      if newValue != originalValue, let clamped = clampedValue {
+        display.pollingCount = clamped
       }
     }
   }
