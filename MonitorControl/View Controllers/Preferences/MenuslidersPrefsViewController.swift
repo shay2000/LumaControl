@@ -84,7 +84,13 @@ class MenuslidersPrefsViewController: NSViewController, SettingsPane {
   }
 
   deinit {
-    prefs.removeObserver(self, forKeyPath: PrefKey.menuIcon.rawValue)
+    // The observer is only registered in viewDidLoad, so it must only be removed when
+    // the view was actually loaded. Instantiating the controller from the storyboard
+    // without ever accessing `view` leaves the observer unregistered, and removing an
+    // unregistered observer throws NSRangeException.
+    if isViewLoaded {
+      prefs.removeObserver(self, forKeyPath: PrefKey.menuIcon.rawValue)
+    }
   }
 
   func populateSettings() {
