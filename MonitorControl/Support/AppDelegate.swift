@@ -289,18 +289,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       if self.reconfigureID != 0 {
         let dispatchedReconfigureID = self.reconfigureID
         os_log("Displays need reconfig after sober with reconfigureID %{public}@", type: .info, String(dispatchedReconfigureID))
+        // `configure()` resumes the XDR boost itself, before it restarts the refresh loop.
         self.configure(dispatchedReconfigureID: dispatchedReconfigureID)
-      } else if Arm64DDC.isArm64 {
+      } else {
         os_log("Displays don't need reconfig after sober but might need AVServices update", type: .info)
         DisplayManager.shared.updateArm64AVServices()
+        // The boost was dropped on the way to sleep; a plain sleep/wake never reaches
+        // `configure()`. Resume before restarting the refresh loop: the loop's first pass
+        // would otherwise read the un-boosted panel and drag the stored brightness back
+        // down to the SDR maximum before the boost has been re-applied, silently
+        // cancelling the XDR setting. The loop itself must also come back on every
+        // architecture — it is what keeps sliders and stored values in step with the
+        // panels — and `updateArm64AVServices()` is a no-op where it does not apply.
+        self.resumeXDRForAllDisplays()
         self.job(start: true)
       }
       self.startupActionWriteRepeatAfterSober()
       self.updateMediaKeyTap()
-      // The boost was dropped on the way to sleep. A wake that also reconfigured the
-      // displays picks it up through `configure()`, but a plain sleep/wake never gets there,
-      // so the panel would be left at its SDR maximum with the slider still reading 150%.
-      self.resumeXDRForAllDisplays()
+      // The resume above can still fail — the EDR window cannot be re-created, or macOS
+      // has withdrawn the extended range — while the stored preference keeps claiming the
+      // panel sits above 100%. Ten seconds in (the resume ran three seconds after waking
+      // and the boost ramps in within a couple more), check whether the boost is actually
+      // running and, where it is not, snap the app's state back to what the panel really
+      // shows instead of leaving the slider reading a value the panel is not delivering.
+      DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) { [weak self] in
+        guard let self = self, self.sleepID == 0, self.reconfigureID == 0 else {
+          return
+        }
+        self.reconcileXDRStateForAllDisplays()
+      }
     }
   }
 
@@ -311,6 +328,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private func resumeXDRForAllDisplays() {
     for display in DisplayManager.shared.displays {
       (display as? AppleDisplay)?.resumeXDRIfNeeded()
+    }
+  }
+
+  /// Brings every display's XDR state back in line with what its panel is really showing.
+  private func reconcileXDRStateForAllDisplays() {
+    for display in DisplayManager.shared.displays {
+      (display as? AppleDisplay)?.reconcileXDRStateAfterWake()
     }
   }
 
@@ -357,6 +381,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
       }
       let nextRefresh = refreshedSomething ? 0.1 : 1.0
+      // The brightness keys are handed back to macOS while the built-in panel sits below
+      // the top of the standard range. This is what takes them back once the panel is at
+      // 100% again — including when macOS itself moved it there with the native keys.
+      // Cheap by design: the tap is only rebuilt when the verdict actually changes.
+      self.mediaKeyTap.refreshBrightnessKeyEngagement()
       DispatchQueue.main.asyncAfter(deadline: .now() + nextRefresh) {
         self.job()
       }
