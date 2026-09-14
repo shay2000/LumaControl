@@ -11,6 +11,10 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
   var keyRepeatTimers: [MediaKey: Timer] = [:]
   /// Guards the "Accessibility is missing" alert so it is shown at most once per session.
   private var didReportMissingAccessibility = false
+  /// The last verdict on holding the brightness keys back from macOS for the XDR range.
+  /// Kept in step by `updateMediaKeyTap()` so `refreshBrightnessKeyEngagement()` can tell
+  /// whether the verdict has actually changed.
+  private var holdingBrightnessKeysForXDR = false
 
   func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
     let isPressed = event?.keyPressed ?? true
@@ -163,18 +167,17 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     // Disengage brightness keys on sleep so MacBook native screen can be controlled meanwhile
     let isTransient = app.sleepID != 0 || app.reconfigureID != 0
     let disengageBrightness = !hasExternalDisplay || isTransient
-    if disengageBrightness, !prefs.bool(forKey: PrefKey.useFineScaleBrightness.rawValue) {
-      // Keep them anyway when the built-in panel can go past 100%. With no external display
-      // attached macOS consumes the brightness keys itself, so `stepBrightness` never runs
-      // and the XDR opt-in is unreachable except by opening the menu and dragging the
-      // slider to 100% — which defeats the point of having the keys. Only while awake and
-      // settled: during sleep and display reconfiguration the panel belongs to macOS.
-      let keepForXDR = !hasExternalDisplay && !isTransient
-        && DisplayManager.shared.displays.contains { ($0 as? AppleDisplay)?.isXDRCapable == true }
-      if !keepForXDR {
-        let keysToDelete: [MediaKey] = [.brightnessUp, .brightnessDown]
-        keys.removeAll { keysToDelete.contains($0) }
-      }
+    // While the built-in XDR panel is at the top of the standard range, or boosting, the
+    // brightness keys must be kept from macOS: the next press up crosses into extended
+    // brightness — or offers to — which macOS will never do on its own. Below that the
+    // keys are handed back, and with them macOS's own brightness overlay and slider
+    // feedback, which this app cannot reproduce (the private OSD manager leaves the
+    // overlay permanently drawn on macOS 27).
+    let holdBrightnessKeysForXDR = MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: DisplayManager.shared.displays, hasExternalDisplay: hasExternalDisplay, isTransient: isTransient)
+    self.holdingBrightnessKeysForXDR = holdBrightnessKeysForXDR
+    if disengageBrightness, !prefs.bool(forKey: PrefKey.useFineScaleBrightness.rawValue), !holdBrightnessKeysForXDR {
+      let keysToDelete: [MediaKey] = [.brightnessUp, .brightnessDown]
+      keys.removeAll { keysToDelete.contains($0) }
     }
     // Remove volume related keys if audio device is controllable
     if let defaultAudioDevice = app.coreAudio.defaultOutputDevice {
@@ -205,6 +208,54 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     if keys.count > 0 {
       self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
       self.mediaKeyTap?.start()
+    }
+  }
+
+  /// Whether the brightness keys must be held back from macOS even though it could handle
+  /// them itself.
+  ///
+  /// With no external display attached, macOS drives the built-in panel's brightness
+  /// perfectly well and shows its own brightness overlay — feedback this app cannot
+  /// reproduce, since the private OSD manager leaves that overlay permanently drawn on
+  /// macOS 27. So while the panel sits below the top of the standard range the keys are
+  /// given back to the system and the native brightness UI returns.
+  ///
+  /// They are taken back only while an XDR-capable panel is at 100% — where the next press
+  /// up has to cross into extended brightness, or offer to, and macOS has nothing to
+  /// offer — or while a boost is actually running, so the extended range can also be
+  /// stepped back down from the keys. Dummy displays are excluded: they exist to stand in
+  /// for hardware and never carry a boost.
+  static func shouldHoldBrightnessKeysForXDR(displays: [Display], hasExternalDisplay: Bool, isTransient: Bool) -> Bool {
+    guard !hasExternalDisplay, !isTransient else {
+      return false
+    }
+    return displays.contains { display in
+      guard let appleDisplay = display as? AppleDisplay, appleDisplay.isXDRCapable, !appleDisplay.isDummy else {
+        return false
+      }
+      return appleDisplay.isXDRBoosting || appleDisplay.getAppleBrightness() >= 0.999
+    }
+  }
+
+  /// Re-checks, from the one-second refresh loop, whether the brightness keys must be
+  /// held for the XDR range.
+  ///
+  /// The verdict changes as the built-in panel crosses the top of the standard range —
+  /// including when macOS moves it there with the native keys while the app is not
+  /// listening — so this is what takes the keys back. Rebuilding the event tap churns the
+  /// session, so it only happens when the verdict actually changed.
+  func refreshBrightnessKeyEngagement() {
+    var hasExternalDisplay = false
+    for display in DisplayManager.shared.getAllDisplays() where !display.isBuiltIn() {
+      hasExternalDisplay = true
+    }
+    let hold = MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(
+      displays: DisplayManager.shared.displays,
+      hasExternalDisplay: hasExternalDisplay,
+      isTransient: app.sleepID != 0 || app.reconfigureID != 0
+    )
+    if hold != self.holdingBrightnessKeysForXDR {
+      self.updateMediaKeyTap()
     }
   }
 

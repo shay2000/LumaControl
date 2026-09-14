@@ -37,12 +37,12 @@ class Display: Equatable {
   /// Whether `stepBrightness` drives the native macOS brightness OSD for this display.
   ///
   /// Defaults to `true` so external (DDC/HDMI) displays, which have no other feedback,
-  /// keep showing the macOS chiclet HUD. Apple displays override this to `false` because
-  /// on macOS 27 the private `OSDManager` we route through leaves the OSD permanently
-  /// drawn: `showImage:…:msecUntilFade:` neither honours the fade timer nor accepts a
-  /// later update that should replace it, so once raised it stays up while the app is
-  /// running. The XDR opt-in dialog and the menu-bar sun are the visible feedback on
-  /// the built-in panel instead.
+  /// keep showing the macOS chiclet HUD. Apple displays override this to report `false`
+  /// on macOS 27 only, where the private `OSDManager` we route through leaves the OSD
+  /// permanently drawn: `showImage:…:msecUntilFade:` neither honours the fade timer nor
+  /// accepts a later update that should replace it, so once raised it stays up while the
+  /// app is running. There the XDR opt-in dialog and the menu-bar sun are the visible
+  /// feedback on the built-in panel instead.
   var showsBrightnessOSD: Bool { true }
 
   func prefExists(key: PrefKey? = nil, for command: Command? = nil) -> Bool {

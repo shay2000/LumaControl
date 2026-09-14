@@ -42,11 +42,17 @@ class AppleDisplay: Display {
 
   override var brightnessMaxValue: Float { self.effectiveBrightnessMax }
 
-  /// The built-in panel never raises macOS's native brightness OSD through `OSDManager`:
-  /// see the override of `showsBrightnessOSD` on `Display`. The menu-bar sun going yellow
-  /// when a boost is active, the XDR opt-in dialog at 100 %, and the live slider in the
-  /// menu are the visible feedback instead.
-  override var showsBrightnessOSD: Bool { false }
+  /// The built-in panel raises macOS's native brightness OSD through `OSDManager` only on
+  /// systems where that overlay still behaves. On macOS 27 it leaves the OSD permanently
+  /// drawn: `showImage:…:msecUntilFade:` neither honours the fade timer nor accepts a
+  /// later update that should replace it, so once raised it stays up while the app is
+  /// running. Everywhere else the OSD is shown, so pressing the brightness keys gives the
+  /// same visual feedback macOS itself would; the menu-bar sun going yellow when a boost
+  /// is active, the XDR opt-in dialog at 100 %, and the live slider in the menu are the
+  /// visible feedback instead where it is not.
+  override var showsBrightnessOSD: Bool {
+    ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 27
+  }
 
   /// True when the panel can do extended brightness but the user has not switched it on.
   var canOfferXDR: Bool {
@@ -187,6 +193,39 @@ class AppleDisplay: Display {
       return
     }
     self.applyBrightnessToPanel(self.getBrightness())
+  }
+
+  /// Brings the app's record of brightness back in line with the panel after a wake that
+  /// killed the XDR boost.
+  ///
+  /// Sleep tears the boost down, and the resume a few seconds after waking can still
+  /// fail: the EDR window cannot be re-created, or macOS has withdrawn the extended
+  /// range. The stored preference then keeps claiming the panel is at, say, 150% while it
+  /// is really at the SDR maximum, and the slider follows the preference. Rather than
+  /// leave that lie in place — with the extended range still enabled and one drag away —
+  /// fall back to the standard range at whatever brightness the panel is actually
+  /// showing. XDR stays enabled, so pushing past 100% starts the boost again.
+  func reconcileXDRStateAfterWake() {
+    guard self.isXDREnabled else {
+      return
+    }
+    guard self.getBrightness() > 1.005, !self.isXDRBoosting else {
+      return
+    }
+    var actual = self.getAppleBrightness()
+    if !(0.001 ... 1.0).contains(actual) {
+      // A failed read leaves 0 behind, and while the boost ran the SDR side was pinned at
+      // the maximum, so fall back to that rather than trusting a dark-screen reading.
+      actual = 1.0
+    }
+    os_log("XDR boost did not survive the wake on display %{public}@; snapping brightness back to %{public}@.", type: .info, String(self.identifier), String(actual))
+    _ = self.setBrightness(actual)
+    if let sliderHandler = self.sliderHandler[.brightness] {
+      sliderHandler.setValue(actual, displayID: self.identifier)
+    }
+    DispatchQueue.main.async {
+      app.updateMenusAndKeys()
+    }
   }
 
   override func stepBrightness(isUp: Bool, isSmallIncrement: Bool) {

@@ -1,5 +1,6 @@
 //  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others
 
+import Cocoa
 import XCTest
 
 @testable import LumaControl
@@ -11,6 +12,17 @@ private class StubbedBrightnessAppleDisplay: AppleDisplay {
 
   override func getBrightness() -> Float {
     self.stubbedBrightness
+  }
+}
+
+// The brightness-key engagement decision reads the panel's live brightness, which dummies
+// always report as the SDR maximum (and are excluded from the decision anyway), so these
+// tests drive it through a non-dummy stub instead.
+private class StubbedPanelAppleDisplay: AppleDisplay {
+  var stubbedPanelBrightness: Float = 1
+
+  override func getAppleBrightness() -> Float {
+    self.stubbedPanelBrightness
   }
 }
 
@@ -268,5 +280,76 @@ final class XDRBrightnessTests: XCTestCase {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { settled.fulfill() }
     wait(for: [settled], timeout: 1.0)
     XCTAssertTrue(display.writes.isEmpty)
+  }
+
+  // MARK: - XDR state after a wake
+
+  func testReconcileXDRAfterWakeSnapsStaleExtendedBrightnessToPanel() {
+    self.appleDisplay.savePref(true, key: .xdrEnabled)
+    self.appleDisplay.savePref(Float(1.5), for: .brightness)
+
+    // The engine never resumed after the wake, so the panel is really at its SDR maximum.
+    // The app must stop claiming 150% and say what the panel shows.
+    self.appleDisplay.reconcileXDRStateAfterWake()
+
+    XCTAssertEqual(self.appleDisplay.getBrightness(), 1.0, accuracy: 0.001)
+  }
+
+  func testReconcileXDRAfterWakeLeavesBrightnessAloneWhenXDRIsOff() {
+    self.appleDisplay.savePref(false, key: .xdrEnabled)
+    self.appleDisplay.savePref(Float(1.5), for: .brightness)
+
+    self.appleDisplay.reconcileXDRStateAfterWake()
+
+    XCTAssertEqual(self.appleDisplay.getBrightness(), 1.5, accuracy: 0.001)
+  }
+
+  func testReconcileXDRAfterWakeLeavesBrightnessAloneBelowExtendedRange() {
+    self.appleDisplay.savePref(true, key: .xdrEnabled)
+    self.appleDisplay.savePref(Float(0.8), for: .brightness)
+
+    self.appleDisplay.reconcileXDRStateAfterWake()
+
+    XCTAssertEqual(self.appleDisplay.getBrightness(), 0.8, accuracy: 0.001)
+  }
+
+  // MARK: - Brightness key engagement
+
+  private func makePanelDisplay(_ identifier: CGDirectDisplayID, name: String, modelNumber: UInt32, panelBrightness: Float, xdrCapable: Bool) -> StubbedPanelAppleDisplay {
+    let display = StubbedPanelAppleDisplay(identifier, name: name, vendorNumber: 1552, modelNumber: modelNumber, serialNumber: 1, isVirtual: false, isDummy: false)
+    display.isXDRCapable = xdrCapable
+    display.stubbedPanelBrightness = panelBrightness
+    return display
+  }
+
+  func testBrightnessKeysAreHeldOnlyAtTheTopOfTheStandardRange() {
+    let below = self.makePanelDisplay(10, name: "XDR Panel Below", modelNumber: 2_001, panelBrightness: 0.5, xdrCapable: true)
+    let atMaximum = self.makePanelDisplay(11, name: "XDR Panel At Max", modelNumber: 2_002, panelBrightness: 1.0, xdrCapable: true)
+
+    // Below 100% macOS gets the keys back — and with them its own brightness feedback.
+    XCTAssertFalse(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [below], hasExternalDisplay: false, isTransient: false))
+    // At 100% the next press up crosses into XDR territory, so the app takes them back.
+    XCTAssertTrue(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [atMaximum], hasExternalDisplay: false, isTransient: false))
+  }
+
+  func testBrightnessKeysAreHeldAtMaximumEvenWithXDROff() {
+    // The opt-in prompt must stay reachable from the keys, so a capable panel that has
+    // not enabled XDR still holds the keys while it sits at the standard maximum.
+    let atMaximum = self.makePanelDisplay(12, name: "XDR Panel Opt In", modelNumber: 2_003, panelBrightness: 1.0, xdrCapable: true)
+
+    XCTAssertTrue(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [atMaximum], hasExternalDisplay: false, isTransient: false))
+  }
+
+  func testBrightnessKeysAreReleasedWithExternalDisplaysOrDuringSleep() {
+    let atMaximum = self.makePanelDisplay(13, name: "XDR Panel External", modelNumber: 2_004, panelBrightness: 1.0, xdrCapable: true)
+
+    XCTAssertFalse(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [atMaximum], hasExternalDisplay: true, isTransient: false))
+    XCTAssertFalse(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [atMaximum], hasExternalDisplay: false, isTransient: true))
+  }
+
+  func testBrightnessKeysAreReleasedForNonXDRPanels() {
+    let plain = self.makePanelDisplay(14, name: "Plain Panel", modelNumber: 2_005, panelBrightness: 1.0, xdrCapable: false)
+
+    XCTAssertFalse(MediaKeyTapManager.shouldHoldBrightnessKeysForXDR(displays: [plain], hasExternalDisplay: false, isTransient: false))
   }
 }
