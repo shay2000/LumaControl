@@ -19,11 +19,18 @@ class OtherDisplay: Display {
       case PollingMode.minimal.rawValue: return 1
       case PollingMode.normal.rawValue: return 5
       case PollingMode.heavy.rawValue: return 20
-      case PollingMode.custom.rawValue: return prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId)
-      default: return PollingMode.none.rawValue
+      // Clamp at the source: a stale negative value saved by an older version must not
+      // reach `UInt(self.pollingCount)` in the setup paths, where the conversion is a
+      // fatal trap. The upper bound matches the Arm64 path's 255-retry cap, so a huge
+      // value cannot hang the Intel read loop for minutes on end. Zero means "no polling",
+      // which is the sensible reading of a bad value. The default arm must also return 0,
+      // NOT `PollingMode.none.rawValue` (-2): an out-of-range stored polling mode falls
+      // through here, and -2 would trap the same way.
+      case PollingMode.custom.rawValue: return min(255, max(0, prefs.integer(forKey: PrefKey.pollingCount.rawValue + self.prefsId)))
+      default: return 0
       }
     }
-    set { prefs.set(newValue, forKey: PrefKey.pollingCount.rawValue + self.prefsId) }
+    set { prefs.set(max(0, newValue), forKey: PrefKey.pollingCount.rawValue + self.prefsId) }
   }
 
   override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
@@ -93,12 +100,9 @@ class OtherDisplay: Display {
     var maxDDCValue = UInt16(DDC_MAX_DETECT_LIMIT)
     var currentDDCValue: UInt16
     switch command {
-    case .audioSpeakerVolume: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125)
+    case .audioSpeakerVolume: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125) // lower default audio value as high volume might rattle the user.
     case .contrast: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.750)
     default: currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 1.000)
-    }
-    if command == .audioSpeakerVolume {
-      currentDDCValue = UInt16(Float(DDC_MAX_DETECT_LIMIT) * 0.125) // lower default audio value as high volume might rattle the user.
     }
     os_log("Setting up display %{public}@ for %{public}@", type: .info, String(self.identifier), String(reflecting: command))
     if !self.isSw() {
@@ -259,11 +263,7 @@ class OtherDisplay: Display {
   }
 
   func isSw() -> Bool {
-    if prefs.bool(forKey: PrefKey.forceSw.rawValue + self.prefsId) || self.isSwOnly() {
-      return true
-    } else {
-      return false
-    }
+    prefs.bool(forKey: PrefKey.forceSw.rawValue + self.prefsId) || self.isSwOnly()
   }
 
   let swAfterOsdAnimationSemaphore = DispatchSemaphore(value: 1)
@@ -423,6 +423,12 @@ class OtherDisplay: Display {
     guard app.sleepID == 0, app.reconfigureID == 0, !self.readPrefAsBool(key: .forceSw), !self.readPrefAsBool(key: .unavailableDDC, for: command) else {
       return values
     }
+    // `pollingCount` is clamped at its getter, so callers should never pass a bad value
+    // here. This is defense in depth: zero tries means "don't read", and the loops below
+    // would otherwise also clamp it themselves.
+    if tries == 0 {
+      return nil
+    }
     let controlCodes = self.getRemapControlCodes(command: command)
     let controlCode = controlCodes.count == 0 ? command.rawValue : controlCodes[0]
     if Arm64DDC.isArm64 {
@@ -491,7 +497,7 @@ class OtherDisplay: Display {
     let deNormalizedValue = (maxDDCValue - minDDCValue) * curvedValue + minDDCValue
     var intDDCValue = UInt16(min(max(deNormalizedValue, minDDCValue), maxDDCValue))
     if from > 0, command == Command.audioSpeakerVolume {
-      intDDCValue = max(1, intDDCValue) // Never let sound to mute accidentally, keep it digitally to at digital 1 if needed as muting breaks some displays
+      intDDCValue = max(1, intDDCValue) // Never let the volume mute accidentally; keep the digital value at 1 or higher if needed, as muting breaks some displays
     }
     return intDDCValue
   }

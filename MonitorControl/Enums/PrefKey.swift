@@ -33,10 +33,10 @@ enum PrefKey: String {
   // Hide brightness sliders
   case hideBrightness
 
-  // Show volume sliders
+  // Show contrast sliders
   case showContrast
 
-  // Show volume sliders
+  // Hide volume sliders
   case hideVolume
 
   // Lower via software after brightness
@@ -48,10 +48,10 @@ enum PrefKey: String {
   // Do not show sliders for Apple displays (including built-in display) in menu
   case hideAppleFromMenu
 
-  // Disable slider snapping
+  // Enable slider snapping
   case enableSliderSnap
 
-  // Disable slider snapping
+  // Show percentage label next to sliders
   case enableSliderPercent
 
   // Show tick marks for sliders
@@ -160,7 +160,7 @@ enum PrefKey: String {
   // Max command value display
   case curveDDC
 
-  // Is the specific control is set as unavailable for display?
+  // Is the specific control set as unavailable for the display?
   case unavailableDDC
 
   // Invert DDC scale?

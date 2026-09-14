@@ -2,7 +2,7 @@
 "About" = "के बारे में";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "ऐसा लगता है कि एक अन्य ऐप चमक या रंगों को बदल देता है जो समस्याओं का कारण बनता है।\n\n इसे हल करने के लिए आपको अन्य ऐप को छोड़ना होगा या मॉनिटरकंट्रोल में अपने डिस्प्ले के लिए गामा नियंत्रण को अक्षम करना होगा!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "ऐसा लगता है कि एक अन्य ऐप चमक या रंगों को बदल देता है जो समस्याओं का कारण बनता है।\n\n इसे हल करने के लिए आपको अन्य ऐप को छोड़ना होगा या मॉनिटरकंट्रोल में अपने डिस्प्ले के लिए गामा नियंत्रण को अक्षम करना होगा!";
 
 /* Shown in the main prefs window */
 "App menu" = "ऐप मेन्यू";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "यह प्रदर्शन हार्डवेयर डीडीसी नियंत्रण का समर्थन करता है। यदि आपको समस्याओं का सामना करना पड़ता है, तो आप सॉफ्टवेयर नियंत्रण को मजबूर करने के लिए हार्डवेयर डीडीसी नियंत्रण को अक्षम कर सकते हैं।";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "यह डिस्प्ले नेटिव ऐप्पल ब्राइटनेस प्रोटोकॉल का समर्थन करता है। यह मैकोस को मॉनिटर कंट्रोल के बिना भी इस प्रदर्शन को नियंत्रित करने की अनुमति देता है।";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "यह डिस्प्ले नेटिव ऐप्पल ब्राइटनेस प्रोटोकॉल का समर्थन करता है। यह मैकोस को मॉनिटर कंट्रोल के बिना भी इस प्रदर्शन को नियंत्रित करने की अनुमति देता है।";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "यह एक आभासी प्रदर्शन है (उदाहरणः एयरप्ले, साइडकार, डिस्प्ले लिंक डॉक या इसी तरह के माध्यम से जुड़ा हुआ प्रदर्शन) जो हार्डवेयर या सॉफ़्टवेयर गैमेटेबल नियंत्रण की अनुमति नहीं देता है। छायांकन का उपयोग एक विकल्प के रूप में किया जाता है लेकिन केवल गैर-दर्पण परिदृश्यों में। माउस कर्सर अप्रभावित रहेगा और पूर्ण स्क्रीन मोड में प्रवेश करते/छोड़ते समय कलाकृतियाँ दिखाई दे सकती हैं।";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "यह एक आभासी प्रदर्शन है (उदाहरणः एयरप्ले, साइडकार, डिस्प्ले लिंक डॉक या इसी तरह के माध्यम से जुड़ा हुआ प्रदर्शन) जो हार्डवेयर या सॉफ़्टवेयर गैमेटेबल नियंत्रण की अनुमति नहीं देता है। छायांकन का उपयोग एक विकल्प के रूप में किया जाता है लेकिन केवल गैर-दर्पण परिदृश्यों में। माउस कर्सर अप्रभावित रहेगा और पूर्ण स्क्रीन मोड में प्रवेश करते/छोड़ते समय कलाकृतियाँ दिखाई दे सकती हैं।";
 
 /* Unknown display name */
 "Unknown" = "अज्ञात";

@@ -2,7 +2,7 @@
 "About" = "Über";
 
 /* Shown in the alert dialog */
-"An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!" = "Eine andere App scheint die Helligkeit oder die Farben zu verändern, was zu Problemen führt.\n\nUm dieses Problem zu lösen, musst du die andere App beenden oder die Gamma-Steuerung für Deine Monitore in LumaControl deaktivieren!";
+"Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!" = "Eine andere App scheint die Helligkeit oder die Farben zu verändern, was zu Problemen führt.\n\nUm dieses Problem zu lösen, musst du die andere App beenden oder die Gamma-Steuerung für Deine Monitore in LumaControl deaktivieren!";
 
 /* Shown in the main prefs window */
 "App menu" = "App Menü";
@@ -128,10 +128,10 @@
 "This display is reported to support hardware DDC control. If you encounter issues, you can disable hardware DDC control to force software control." = "Dieser Monitor unterstützt anscheinend die Hardware-DDC-Steuerung. Wenn Probleme auftreten, kannst du die Hardware-DDC-Steuerung deaktivieren, um die Software-Steuerung zu erzwingen.";
 
 /* Shown in the Display Settings */
-"This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well." = "Dieser Monitor unterstützt das native Apple Helligkeitsprotokoll. Dies ermöglicht es macOS, diesen Monitor auch ohne LumaControl zu steuern.";
+"This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well." = "Dieser Monitor unterstützt das native Apple Helligkeitsprotokoll. Dies ermöglicht es macOS, diesen Monitor auch ohne LumaControl zu steuern.";
 
 /* Shown in the Display Settings */
-"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Dies ist ein virtueller Monitor (Beispiele: AirPlay, Sidecar, über ein DisplayLink-Dock o.ä. angeschlossener Monitor), der keine hardware- oder softwareseitig gammierbare Steuerung erlaubt. Schattierung wird als Ersatz verwendet, aber nur in Nicht-Spiegelungs-Szenarien. Der Mauszeiger wird nicht beeinflusst und es können Artefakte auftreten, wenn der Vollbildmodus aktiviert oder verlassen wird.";
+"This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Dies ist ein virtueller Monitor (Beispiele: AirPlay, Sidecar, über ein DisplayLink-Dock o.ä. angeschlossener Monitor), der keine hardware- oder softwareseitig gammierbare Steuerung erlaubt. Schattierung wird als Ersatz verwendet, aber nur in Nicht-Spiegelungs-Szenarien. Der Mauszeiger wird nicht beeinflusst und es können Artefakte auftreten, wenn der Vollbildmodus aktiviert oder verlassen wird.";
 
 /* unknown display name
  unknown model

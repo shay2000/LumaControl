@@ -214,7 +214,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     guard self.sleepID == 0, dispatchedReconfigureID == self.reconfigureID else {
       return
     }
-    os_log("Request for configuration with reconfigreID %{public}@", type: .info, String(dispatchedReconfigureID))
+    os_log("Request for configuration with reconfigureID %{public}@", type: .info, String(dispatchedReconfigureID))
     self.reconfigureID = 0
     DisplayManager.shared.gammaInterferenceCounter = 0
     DisplayManager.shared.configureDisplays()
@@ -400,8 +400,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func setStartAtLogin(enabled: Bool) {
-    let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-    SMLoginItemSetEnabled(identifier, enabled)
+    guard let bundleID = Bundle.main.bundleIdentifier else {
+      os_log("Cannot toggle start at login without a bundle identifier.", type: .error)
+      return
+    }
+    SMLoginItemSetEnabled("\(bundleID)Helper" as CFString, enabled)
   }
 
   func getSystemSettings() -> [String: AnyObject]? {

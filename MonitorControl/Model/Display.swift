@@ -74,7 +74,7 @@ class Display: Equatable {
   }
 
   private func getKey(key: PrefKey? = nil, for command: Command? = nil) -> String {
-    (key ?? PrefKey.value).rawValue + (command != nil ? String((command ?? Command.none).rawValue) : "") + self.prefsId
+    (key ?? PrefKey.value).rawValue + (command.map { String($0.rawValue) } ?? "") + self.prefsId
   }
 
   init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
@@ -331,7 +331,7 @@ class Display: Equatable {
       DisplayManager.shared.gammaInterferenceWarningShown = true
       let alert = NSAlert()
       alert.messageText = NSLocalizedString("Is f.lux or similar running?", comment: "Shown in the alert dialog")
-      alert.informativeText = NSLocalizedString("An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in LumaControl!", comment: "Shown in the alert dialog")
+      alert.informativeText = NSLocalizedString("Another app seems to be changing the brightness or colors, which causes issues.\n\nTo solve this, quit the other app or disable gamma control for your displays in LumaControl!", comment: "Shown in the alert dialog")
       alert.addButton(withTitle: NSLocalizedString("I'll quit the other app", comment: "Shown in the alert dialog"))
       alert.addButton(withTitle: NSLocalizedString("Disable gamma control for my displays", comment: "Shown in the alert dialog"))
       alert.alertStyle = NSAlert.Style.critical
@@ -359,10 +359,7 @@ class Display: Equatable {
     guard !self.isVirtual, !self.isDummy else {
       return false
     }
-    if self.getSwBrightness() < 1 {
-      return true
-    }
-    return false
+    return self.getSwBrightness() < 1
   }
 
   func refreshBrightness() -> Float {
@@ -370,10 +367,6 @@ class Display: Equatable {
   }
 
   func isBuiltIn() -> Bool {
-    if CGDisplayIsBuiltin(self.identifier) != 0 {
-      return true
-    } else {
-      return false
-    }
+    CGDisplayIsBuiltin(self.identifier) != 0
   }
 }

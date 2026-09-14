@@ -51,15 +51,16 @@ class MainPrefsViewController: NSViewController, SettingsPane {
 
   @available(macOS, deprecated: 10.10)
   func populateSettings() {
-    // This is marked as deprectated but according to the function header it still does not have a replacement as of macOS 12 Monterey and is valid to use.
-    let startAtLogin = (SMCopyAllJobDictionaries(kSMDomainUserLaunchd).takeRetainedValue() as? [[String: AnyObject]])?.first { $0["Label"] as? String == "\(Bundle.main.bundleIdentifier!)Helper" }?["OnDemand"] as? Bool ?? false
+    // This is marked as deprecated but according to the function header it still does not have a replacement as of macOS 12 Monterey and is valid to use.
+    let helperLabel = "\(Bundle.main.bundleIdentifier ?? "")Helper"
+    let startAtLogin = (SMCopyAllJobDictionaries(kSMDomainUserLaunchd).takeRetainedValue() as? [[String: AnyObject]])?.first { $0["Label"] as? String == helperLabel }?["OnDemand"] as? Bool ?? false
     self.startAtLogin.state = startAtLogin ? .on : .off
     self.combinedBrightness.state = prefs.bool(forKey: PrefKey.disableCombinedBrightness.rawValue) ? .off : .on
     self.allowZeroSwBrightness.state = prefs.bool(forKey: PrefKey.allowZeroSwBrightness.rawValue) ? .on : .off
     self.enableSmooth.state = prefs.bool(forKey: PrefKey.disableSmoothBrightness.rawValue) ? .off : .on
     self.enableBrightnessSync.state = prefs.bool(forKey: PrefKey.enableBrightnessSync.rawValue) ? .on : .off
     self.startupAction.selectItem(withTag: prefs.integer(forKey: PrefKey.startupAction.rawValue))
-    // Preload Display settings to some extent to properly set up size in orther that animation won't fail
+    // Preload the other settings panes so their views are sized before the window animates open
     menuslidersPrefsVc?.view.layoutSubtreeIfNeeded()
     keyboardPrefsVc?.view.layoutSubtreeIfNeeded()
     displaysPrefsVc?.view.layoutSubtreeIfNeeded()

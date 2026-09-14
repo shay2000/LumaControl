@@ -91,7 +91,7 @@ class DisplaysPrefsViewController: NSViewController, SettingsPane, NSTableViewDa
       displayType = NSLocalizedString("Virtual Display", comment: "Shown in the Display Settings")
       displayImage = "tv.and.mediabox"
       controlMethod = NSLocalizedString("Software (shade)", comment: "Shown in the Display Settings") + "  ⚠️"
-      controlStatus = NSLocalizedString("This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode.", comment: "Shown in the Display Settings")
+      controlStatus = NSLocalizedString("This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gamma table control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode.", comment: "Shown in the Display Settings")
     } else if display is OtherDisplay, !display.isDummy {
       displayType = NSLocalizedString("External Display", comment: "Shown in the Display Settings")
       displayImage = "display"
@@ -131,7 +131,7 @@ class DisplaysPrefsViewController: NSViewController, SettingsPane, NSTableViewDa
         displayImage = "display"
       }
       controlMethod = NSLocalizedString("Hardware (Apple)", comment: "Shown in the Display Settings")
-      controlStatus = NSLocalizedString("This display supports native Apple brightness protocol. This allows macOS to control this display without LumaControl as well.", comment: "Shown in the Display Settings")
+      controlStatus = NSLocalizedString("This display supports Apple's native brightness protocol. This allows macOS to control this display without LumaControl as well.", comment: "Shown in the Display Settings")
     }
     return DisplayInfo(displayType: displayType, displayImage: displayImage, controlMethod: controlMethod, controlStatus: controlStatus)
   }
@@ -147,7 +147,7 @@ class DisplaysPrefsViewController: NSViewController, SettingsPane, NSTableViewDa
 
       // ID
       cell.displayId.stringValue = String(display.identifier)
-      // Firendly name
+      // Friendly name
       cell.friendlyName.stringValue = (display.readPrefAsString(key: .friendlyName) != "" ? display.readPrefAsString(key: .friendlyName) : display.name)
       cell.friendlyName.isEditable = true
       // Enabled
