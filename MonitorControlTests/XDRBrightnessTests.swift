@@ -26,6 +26,15 @@ private class StubbedPanelAppleDisplay: AppleDisplay {
   }
 }
 
+// reconcileXDRStateAfterWake() decides from the stored brightness, which dummies always
+// report as 1, so these tests drive the stored value through a stub that reads the
+// preference — the same read the real non-dummy path performs.
+private class PrefReadingBrightnessAppleDisplay: AppleDisplay {
+  override func getBrightness() -> Float {
+    self.prefExists(for: .brightness) ? self.readPrefAsFloat(for: .brightness) : 1
+  }
+}
+
 private final class RecordingBrightnessDisplay: Display {
   var writes: [(value: Float, isMainThread: Bool)] = []
   var onWrite: ((Float) -> Void)?
@@ -285,32 +294,50 @@ final class XDRBrightnessTests: XCTestCase {
   // MARK: - XDR state after a wake
 
   func testReconcileXDRAfterWakeSnapsStaleExtendedBrightnessToPanel() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(1.5), for: .brightness)
+    let display = PrefReadingBrightnessAppleDisplay(20, name: "XDR Wake Display", vendorNumber: 1552, modelNumber: 3_001, serialNumber: 1, isVirtual: false, isDummy: true)
+    defer {
+      display.removePref(key: .xdrEnabled)
+      display.removePref(key: .value, for: .brightness)
+    }
+    display.isXDRCapable = true
+    display.savePref(true, key: .xdrEnabled)
+    display.savePref(Float(1.5), for: .brightness)
 
     // The engine never resumed after the wake, so the panel is really at its SDR maximum.
     // The app must stop claiming 150% and say what the panel shows.
-    self.appleDisplay.reconcileXDRStateAfterWake()
+    display.reconcileXDRStateAfterWake()
 
-    XCTAssertEqual(self.appleDisplay.getBrightness(), 1.0, accuracy: 0.001)
+    XCTAssertEqual(display.getBrightness(), 1.0, accuracy: 0.001)
   }
 
   func testReconcileXDRAfterWakeLeavesBrightnessAloneWhenXDRIsOff() {
-    self.appleDisplay.savePref(false, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(1.5), for: .brightness)
+    let display = PrefReadingBrightnessAppleDisplay(21, name: "XDR Wake Display 2", vendorNumber: 1552, modelNumber: 3_002, serialNumber: 2, isVirtual: false, isDummy: true)
+    defer {
+      display.removePref(key: .xdrEnabled)
+      display.removePref(key: .value, for: .brightness)
+    }
+    display.isXDRCapable = true
+    display.savePref(false, key: .xdrEnabled)
+    display.savePref(Float(1.5), for: .brightness)
 
-    self.appleDisplay.reconcileXDRStateAfterWake()
+    display.reconcileXDRStateAfterWake()
 
-    XCTAssertEqual(self.appleDisplay.getBrightness(), 1.5, accuracy: 0.001)
+    XCTAssertEqual(display.getBrightness(), 1.5, accuracy: 0.001)
   }
 
   func testReconcileXDRAfterWakeLeavesBrightnessAloneBelowExtendedRange() {
-    self.appleDisplay.savePref(true, key: .xdrEnabled)
-    self.appleDisplay.savePref(Float(0.8), for: .brightness)
+    let display = PrefReadingBrightnessAppleDisplay(22, name: "XDR Wake Display 3", vendorNumber: 1552, modelNumber: 3_003, serialNumber: 3, isVirtual: false, isDummy: true)
+    defer {
+      display.removePref(key: .xdrEnabled)
+      display.removePref(key: .value, for: .brightness)
+    }
+    display.isXDRCapable = true
+    display.savePref(true, key: .xdrEnabled)
+    display.savePref(Float(0.8), for: .brightness)
 
-    self.appleDisplay.reconcileXDRStateAfterWake()
+    display.reconcileXDRStateAfterWake()
 
-    XCTAssertEqual(self.appleDisplay.getBrightness(), 0.8, accuracy: 0.001)
+    XCTAssertEqual(display.getBrightness(), 0.8, accuracy: 0.001)
   }
 
   // MARK: - Brightness key engagement
