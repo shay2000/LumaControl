@@ -223,9 +223,9 @@ class AppleDisplay: Display {
     if let sliderHandler = self.sliderHandler[.brightness] {
       sliderHandler.setValue(actual, displayID: self.identifier)
     }
-    DispatchQueue.main.async {
-      app.updateMenusAndKeys()
-    }
+    // No menu rebuild is needed here, unlike on a disable: XDR stays enabled, so the menu
+    // items and the slider's extended range are unchanged, the live slider was just updated
+    // directly, and the menu-bar icon follows the engine's own boost notifications.
   }
 
   override func stepBrightness(isUp: Bool, isSmallIncrement: Bool) {
